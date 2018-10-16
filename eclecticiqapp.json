@@ -20,8 +20,6 @@
         "tip_uri": {
             "description": "EclecticIQ TIP url",
             "data_type": "string",
-            "required": true,
-            "value_list": [],
             "default": "https://tip_url.local",
             "order": 0
         },
@@ -29,8 +27,6 @@
             "description": "EclecticIQ TIP Username",
             "data_type": "string",
             "required": true,
-            "value_list": [],
-            "default": "",
             "order": 1
         },
         "tip_password": {
@@ -43,16 +39,12 @@
             "description": "EclecticIQ TIP Group Name for Sightings",
             "data_type": "string",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 3
         },
         "tip_of_id": {
             "description": "EclecticIQ TIP Outgoing Feed ID # for polling",
             "data_type": "numeric",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 4
         }
     },
@@ -85,8 +77,6 @@
                         "domain",
                         "url"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -180,8 +170,6 @@
                     "contains": [
                         "email"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -276,8 +264,6 @@
                         "sha1",
                         "md5"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -375,8 +361,6 @@
                     "contains": [
                         "ip"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -480,8 +464,6 @@
                     "contains": [
                         "url"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -561,7 +543,6 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
-            "verbose": "verbouse description of Create sighting in EclecticIQ TIP",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -569,16 +550,14 @@
                     "description": "Observable value",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
-                    "value_list": [],
-                    "default": "",
+                    "primary": false,
                     "order": 1
                 },
                 "sighting_type": {
                     "description": "Observable type",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
+                    "primary": false,
                     "value_list": [
                         "ipv4",
                         "hash-md5",
@@ -612,8 +591,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "value_list": [],
-                    "default": "",
                     "order": 2
                 },
                 "sighting_title": {
@@ -621,7 +598,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "value_list": [],
                     "default": "Sighting created by Phantom",
                     "order": 3
                 },
@@ -630,7 +606,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "value_list": [],
                     "default": "Phantom Sighting, Automatically created",
                     "order": 5
                 }
@@ -1073,7 +1048,6 @@
             "action": "query entities",
             "identifier": "query_entities",
             "description": "Query EclecticIQ TIP for entities",
-            "verbose": "verbouse description of Query EclecticIQ TIP for entities ",
             "type": "investigate",
             "read_only": false,
             "parameters": {
@@ -1092,8 +1066,6 @@
                         "md5",
                         "sha512"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -1254,8 +1226,6 @@
                     "required": false,
                     "primary": false,
                     "contains": [],
-                    "value_list": [],
-                    "default": ""
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
@@ -1263,8 +1233,6 @@
                     "required": false,
                     "primary": false,
                     "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 1
                 },
                 "end_time": {
@@ -1273,8 +1241,6 @@
                     "required": false,
                     "primary": false,
                     "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 2
                 },
                 "container_count": {
@@ -1282,18 +1248,14 @@
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": ""
+                    "contains": []
                 },
                 "artifact_count": {
                     "description": "Maximum number of artifact records to query for.",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": ""
+                    "contains": []
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
@@ -1301,8 +1263,6 @@
                     "required": false,
                     "primary": false,
                     "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 5
                 }
             },
