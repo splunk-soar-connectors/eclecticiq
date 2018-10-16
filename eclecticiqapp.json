@@ -1224,15 +1224,13 @@
                     "description": "Container IDs to limit the ingestion to",
                     "data_type": "string",
                     "required": false,
-                    "primary": false,
-                    "contains": [],
+                    "primary": false
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "order": 1
                 },
                 "end_time": {
@@ -1240,29 +1238,25 @@
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "order": 2
                 },
                 "container_count": {
-                    "description": "Maximum number of container records to query for.",
+                    "description": "Maximum number of container records to query for",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
-                    "contains": []
+                    "primary": false
                 },
                 "artifact_count": {
-                    "description": "Maximum number of artifact records to query for.",
+                    "description": "Maximum number of artifact records to query for",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
-                    "contains": []
+                    "primary": false
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "order": 5
                 }
             },
