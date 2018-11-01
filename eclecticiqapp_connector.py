@@ -123,6 +123,7 @@ class EclecticiqAppConnector(BaseConnector):
                             data=data,
                             headers=headers,
                             verify=config.get('verify_server_cert', False),
+                            timeout=15,
                             params=params)
         except Exception as e:
             return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
@@ -170,34 +171,32 @@ class EclecticiqAppConnector(BaseConnector):
                     container = dict()
                     container['data'] = event
                     container['source_data_identifier'] = event['id']
-                    container['name'] = event['data']['title'] + " - type:" + event['data']['type']
+
+                    try:
+                        container['name'] = event['data']['title']
+                    except KeyError:
+                        container['name'] = 'No Title'
+
+                    container['name'] += " - type: "
+
+                    try:
+                        container['name'] += event['data']['type']
+                    except KeyError:
+                        container['name'] = 'No Type'
+
                     container['id'] = event['id']
 
                     try:
                         sensitivity = event['meta']['tlp_color']
-                        if sensitivity == "RED":
-                            container['sensitivity'] = "red"
-                        elif sensitivity == "AMBER":
-                            container['sensitivity'] = "amber"
-                        elif sensitivity == "GREEN":
-                            container['sensitivity'] = "green"
-                        elif sensitivity == "WHITE":
-                            container['sensitivity'] = "white"
-                        else:
-                            container['sensitivity'] = ''
+                        if sensitivity in ["RED", "AMBER", "GREEN", "WHITE"]:
+                            container['sensitivity'] = sensitivity.lower()
                     except KeyError:
                         pass
 
                     try:
                         severity = event['data']['impact']['value']
-                        if severity == "High":
-                            container['severity'] = "high"
-                        elif severity == "Medium":
-                            container['severity'] = "medium"
-                        elif severity == "Low":
-                            container['severity'] = "low"
-                        else:
-                            container['severity'] = ''
+                        if severity in ["High", "Medium", "Low"]:
+                            container['severity'] = severity.lower()
                     except KeyError:
                         pass
 
@@ -228,17 +227,8 @@ class EclecticiqAppConnector(BaseConnector):
 
         containers_processed = 0
         for i, result in enumerate(results):
-
             # result is a dictionary of a single container and artifacts
             if ('container' not in result):
-                continue
-
-            if ('artifacts' not in result):
-                # igonore containers without artifacts
-                continue
-
-            if (len(result['artifacts']) == 0):
-                # igonore containers without artifacts
                 continue
 
             containers_processed += 1
@@ -323,22 +313,16 @@ class EclecticiqAppConnector(BaseConnector):
                     cef['requestURL'] = observation['value']
                 elif kind == "email":
                     cef['suser'] = observation['value']
-                elif kind == "hash-md5":
+                elif kind in ["hash-md5", "hash-sha1", "hash-sha256", "hash-sha512"]:
                     cef['cs1'] = kind
                     cef['cs1Label'] = "HashType"
                     cef['fileHash'] = observation['value']
-                elif kind == "hash-sha1":
+                    cef['hash'] = observation['value']
+                else:
                     cef['cs1'] = kind
-                    cef['cs1Label'] = "HashType"
-                    cef['fileHash'] = observation['value']
-                elif kind == "hash-sha256":
-                    cef['cs1'] = kind
-                    cef['cs1Label'] = "HashType"
-                    cef['fileHash'] = observation['value']
-                elif kind == "hash-sha512":
-                    cef['cs1'] = kind
-                    cef['cs1Label'] = "HashType"
-                    cef['fileHash'] = observation['value']
+                    cef['cs1Label'] = "EIQ_Kind"
+                    cef['cs2'] = observation['value']
+                    cef['cs2Label'] = "EIQ_Value"
             except KeyError:
                 pass
 
@@ -364,11 +348,23 @@ class EclecticiqAppConnector(BaseConnector):
             self.save_progress("Testing Outgoing Feed availability")
             endpoint_uri = '/private/outgoing-feed-download/' + str(self._tip_of_id) + '/runs/latest'
             ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+
             if (phantom.is_fail(ret_val)):
                 self.save_progress("Outgoing Feed check Failed.")
                 return action_result.get_status()
             message_status = str(len(response['data']['content_blocks']))
-            self.save_progress("Test passed, in Outgoing Feed: " + message_status + " blocks.")
+            self.save_progress("Outgoing Feed is available in the Feed: " + message_status + " blocks.")
+
+            try:
+                endpoint_uri = str(response['data']['content_blocks'][0])
+                ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+                cf_result = action_result._ActionResult__status_message
+                if cf_result.startswith("Unable to parse JSON response"):
+                    self.save_progress("Content test of Outgoing Feed failed. Check content type of Outgoing Feed in Platform. It must be JSON.")
+                else:
+                    self.save_progress("Content test of Outgoing Feed passed.")
+            except Exception:
+                self.save_progress("Content test of Outgoing Feed failed. Check content of Outgoing Feed in Platform.")
             self.save_progress("-----------------------------------------")
 
         if self._tip_group != "None":
@@ -399,19 +395,33 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
+        if response['total_count'] > 0:
+            parse_result = []
+            for k in response['data']:
+                resp_upd = k.setdefault('last_updated_at', 'None')
+                resp_malic = k['meta'].setdefault('maliciousness', 'None')
+                resp_value = k.setdefault('value', 'None')
+                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(domain)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
+                parse_result.append(
+                    {
+                        'last_upd': resp_upd,
+                        'maliciosness': resp_malic,
+                        'value': resp_value,
+                        'TIP_uri': resp_tip_uri
+                    }
+                )
 
-        if response['total_count'] >= 1:
-            summary['TIP_uri'] = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(domain)
-            summary['important_data'] = 'Domain found in Threat Intelligence Platform.'
+            # Add the response into the data section
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'Domain found in Threat Intelligence Platform.')
+        elif response['total_count'] == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'Domain not found in Threat Intelligence Platform.')
         else:
-            summary['important_data'] = 'Domain not found in Threat Intelligence Platform.'
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_email_reputation(self, param):
 
@@ -429,19 +439,33 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
+        if response['total_count'] > 0:
+            parse_result = []
+            for k in response['data']:
+                resp_upd = k.setdefault('last_updated_at', 'None')
+                resp_malic = k['meta'].setdefault('maliciousness', 'None')
+                resp_value = k.setdefault('value', 'None')
+                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(email)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
+                parse_result.append(
+                    {
+                        'last_upd': resp_upd,
+                        'maliciosness': resp_malic,
+                        'value': resp_value,
+                        'TIP_uri': resp_tip_uri
+                    }
+                )
 
-        if response['total_count'] >= 1:
-            summary['TIP_uri'] = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(email)
-            summary['important_data'] = 'Email found in Threat Intelligence Platform.'
+            # Add the response into the data section
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'Email found in Threat Intelligence Platform.')
+        elif response['total_count'] == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'Email not found in Threat Intelligence Platform.')
         else:
-            summary['important_data'] = 'Email not found in Threat Intelligence Platform.'
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_file_reputation(self, param):
 
@@ -459,19 +483,33 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
+        if response['total_count'] > 0:
+            parse_result = []
+            for k in response['data']:
+                resp_upd = k.setdefault('last_updated_at', 'None')
+                resp_malic = k['meta'].setdefault('maliciousness', 'None')
+                resp_value = k.setdefault('value', 'None')
+                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(file_hash)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
+                parse_result.append(
+                    {
+                        'last_upd': resp_upd,
+                        'maliciosness': resp_malic,
+                        'value': resp_value,
+                        'TIP_uri': resp_tip_uri
+                    }
+                )
 
-        if response['total_count'] >= 1:
-            summary['TIP_uri'] = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(file_hash)
-            summary['important_data'] = 'File hash found in Threat Intelligence Platform.'
+            # Add the response into the data section
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in Threat Intelligence Platform.')
+        elif response['total_count'] == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'File hash not found in Threat Intelligence Platform.')
         else:
-            summary['important_data'] = 'File hash not found in Threat Intelligence Platform.'
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_ip_reputation(self, param):
 
@@ -489,19 +527,33 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
+        if response['total_count'] > 0:
+            parse_result = []
+            for k in response['data']:
+                resp_upd = k.setdefault('last_updated_at', 'None')
+                resp_malic = k['meta'].setdefault('maliciousness', 'None')
+                resp_value = k.setdefault('value', 'None')
+                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(ip)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
+                parse_result.append(
+                    {
+                        'last_upd': resp_upd,
+                        'maliciosness': resp_malic,
+                        'value': resp_value,
+                        'TIP_uri': resp_tip_uri
+                    }
+                )
 
-        if response['total_count'] >= 1:
-            summary['TIP_uri'] = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(ip)
-            summary['important_data'] = 'IP found in Threat Intelligence Platform.'
+            # Add the response into the data section
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'IP found in Threat Intelligence Platform.')
+        elif response['total_count'] == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'IP not found in Threat Intelligence Platform.')
         else:
-            summary['important_data'] = 'IP not found in Threat Intelligence Platform.'
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_url_reputation(self, param):
 
@@ -519,19 +571,33 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
+        if response['total_count'] > 0:
+            parse_result = []
+            for k in response['data']:
+                resp_upd = k.setdefault('last_updated_at', 'None')
+                resp_malic = k['meta'].setdefault('maliciousness', 'None')
+                resp_value = k.setdefault('value', 'None')
+                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(url)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
+                parse_result.append(
+                    {
+                        'last_upd': resp_upd,
+                        'maliciosness': resp_malic,
+                        'value': resp_value,
+                        'TIP_uri': resp_tip_uri
+                    }
+                )
 
-        if response['total_count'] >= 1:
-            summary['TIP_uri'] = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(url)
-            summary['important_data'] = 'URL found in Threat Intelligence Platform.'
+            # Add the response into the data section
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'URL found in Threat Intelligence Platform.')
+        elif response['total_count'] == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'URL not found in Threat Intelligence Platform.')
         else:
-            summary['important_data'] = 'URL not found in Threat Intelligence Platform.'
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_create_sighting(self, param):
 
@@ -604,18 +670,13 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
-
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-
         try:
             len(response['data'])
+            summary = action_result.update_summary({})
             summary['important_data'] = 'Sighting was created in Threat Intelligence Platform.'
+            action_result.add_data(response)
             return action_result.set_status(phantom.APP_SUCCESS)
         except:
-            summary['important_data'] = 'Sighting wasnt created in Threat Intelligence Platform.'
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_query_entities(self, param):
@@ -626,21 +687,51 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         query = param['query']
-        endpoint_uri = "/private/search-all?q={0}&type=indicator".format(query)
-
-        # make rest call
+        endpoint_uri = "/private/search-all?q=extracts.value:{0}&type=indicator".format(query)
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        action_result.add_data(response)
+        parse_result = []
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        if len(response['hits']['hits']) > 0:
+            for k in response['hits']['hits']:
+                for kk in k['_source']['extracts']:
+                    resp_classification = kk['meta'].setdefault('classification', 'None')
+                    resp_confidence = kk['meta'].setdefault('confidence', 'None')
+                    resp_kind = kk.setdefault('kind', 'None')
+                    resp_value = kk.setdefault('value', 'None')
+                    resp_title = k['_source']['data'].setdefault('title', 'None')
+                    resp_description = k['_source']['data'].setdefault('description', 'None')
+                    resp_threat_start = k['_source']['meta'].setdefault('estimated_threat_start_time', 'None')
+                    resp_tags = ''
+                    resp_source_name = k['_source']['sources'][0].setdefault('name', 'None')
+                    resp_tags = ', '.join(k['_source']['tags'])
+                    parse_result.append(
+                        {
+                            'extract_kind': resp_kind,
+                            'extract_value': resp_value,
+                            'extract_classification': resp_classification,
+                            'extract_confidence': resp_confidence,
+                            'title': resp_title,
+                            'description': resp_description,
+                            'threat_start': resp_threat_start,
+                            'tags': resp_tags,
+                            'source_name': resp_source_name
+                        }
+                    )
 
-        return action_result.set_status(phantom.APP_SUCCESS)
+            action_result.add_data(response)
+            summary = action_result.update_summary({})
+            summary['parsed_response'] = parse_result
+
+            return action_result.set_status(phantom.APP_SUCCESS, 'Entitie found in Threat Intelligence Platform.')
+
+        elif len(response['hits']['hits']) == 0:
+            return action_result.set_status(phantom.APP_SUCCESS, 'Entitie not found in Threat Intelligence Platform.')
+        else:
+            return action_result.set_status(phantom.APP_ERROR)
 
     def handle_action(self, param):
 
