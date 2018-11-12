@@ -396,14 +396,14 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.get_status()
 
         if response['total_count'] > 0:
-            parse_result = []
+            parsed_response = []
             for k in response['data']:
                 resp_upd = k.setdefault('last_updated_at', 'None')
                 resp_malic = k['meta'].setdefault('maliciousness', 'None')
                 resp_value = k.setdefault('value', 'None')
                 resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(domain)
 
-                parse_result.append(
+                parsed_response.append(
                     {
                         'last_upd': resp_upd,
                         'maliciosness': resp_malic,
@@ -413,13 +413,19 @@ class EclecticiqAppConnector(BaseConnector):
                 )
 
             # Add the response into the data section
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
+
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = response['total_count']
 
             return action_result.set_status(phantom.APP_SUCCESS, 'Domain found in Threat Intelligence Platform.')
+
         elif response['total_count'] == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'Domain not found in Threat Intelligence Platform.')
+
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -440,14 +446,14 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.get_status()
 
         if response['total_count'] > 0:
-            parse_result = []
+            parsed_response = []
             for k in response['data']:
                 resp_upd = k.setdefault('last_updated_at', 'None')
                 resp_malic = k['meta'].setdefault('maliciousness', 'None')
                 resp_value = k.setdefault('value', 'None')
                 resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(email)
 
-                parse_result.append(
+                parsed_response.append(
                     {
                         'last_upd': resp_upd,
                         'maliciosness': resp_malic,
@@ -457,12 +463,16 @@ class EclecticiqAppConnector(BaseConnector):
                 )
 
             # Add the response into the data section
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
+
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = response['total_count']
 
             return action_result.set_status(phantom.APP_SUCCESS, 'Email found in Threat Intelligence Platform.')
         elif response['total_count'] == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'Email not found in Threat Intelligence Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
@@ -484,14 +494,14 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.get_status()
 
         if response['total_count'] > 0:
-            parse_result = []
+            parsed_response = []
             for k in response['data']:
                 resp_upd = k.setdefault('last_updated_at', 'None')
                 resp_malic = k['meta'].setdefault('maliciousness', 'None')
                 resp_value = k.setdefault('value', 'None')
                 resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(file_hash)
 
-                parse_result.append(
+                parsed_response.append(
                     {
                         'last_upd': resp_upd,
                         'maliciosness': resp_malic,
@@ -501,12 +511,16 @@ class EclecticiqAppConnector(BaseConnector):
                 )
 
             # Add the response into the data section
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
+
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = response['total_count']
 
             return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in Threat Intelligence Platform.')
         elif response['total_count'] == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'File hash not found in Threat Intelligence Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
@@ -528,14 +542,14 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.get_status()
 
         if response['total_count'] > 0:
-            parse_result = []
+            parsed_response = []
             for k in response['data']:
                 resp_upd = k.setdefault('last_updated_at', 'None')
                 resp_malic = k['meta'].setdefault('maliciousness', 'None')
                 resp_value = k.setdefault('value', 'None')
                 resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(ip)
 
-                parse_result.append(
+                parsed_response.append(
                     {
                         'last_upd': resp_upd,
                         'maliciosness': resp_malic,
@@ -545,12 +559,16 @@ class EclecticiqAppConnector(BaseConnector):
                 )
 
             # Add the response into the data section
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
+
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = response['total_count']
 
             return action_result.set_status(phantom.APP_SUCCESS, 'IP found in Threat Intelligence Platform.')
         elif response['total_count'] == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'IP not found in Threat Intelligence Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
@@ -572,14 +590,14 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.get_status()
 
         if response['total_count'] > 0:
-            parse_result = []
+            parsed_response = []
             for k in response['data']:
                 resp_upd = k.setdefault('last_updated_at', 'None')
                 resp_malic = k['meta'].setdefault('maliciousness', 'None')
                 resp_value = k.setdefault('value', 'None')
                 resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(url)
 
-                parse_result.append(
+                parsed_response.append(
                     {
                         'last_upd': resp_upd,
                         'maliciosness': resp_malic,
@@ -589,12 +607,16 @@ class EclecticiqAppConnector(BaseConnector):
                 )
 
             # Add the response into the data section
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
+
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = response['total_count']
 
             return action_result.set_status(phantom.APP_SUCCESS, 'URL found in Threat Intelligence Platform.')
         elif response['total_count'] == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'URL not found in Threat Intelligence Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
@@ -674,7 +696,7 @@ class EclecticiqAppConnector(BaseConnector):
             len(response['data'])
             summary = action_result.update_summary({})
             summary['important_data'] = 'Sighting was created in Threat Intelligence Platform.'
-            action_result.add_data(response)
+            action_result.add_extra_data(response)
             return action_result.set_status(phantom.APP_SUCCESS)
         except:
             return action_result.set_status(phantom.APP_ERROR)
@@ -693,7 +715,7 @@ class EclecticiqAppConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        parse_result = []
+        parsed_response = []
 
         if len(response['hits']['hits']) > 0:
             for k in response['hits']['hits']:
@@ -708,7 +730,7 @@ class EclecticiqAppConnector(BaseConnector):
                     resp_tags = ''
                     resp_source_name = k['_source']['sources'][0].setdefault('name', 'None')
                     resp_tags = ', '.join(k['_source']['tags'])
-                    parse_result.append(
+                    parsed_response.append(
                         {
                             'extract_kind': resp_kind,
                             'extract_value': resp_value,
@@ -721,14 +743,18 @@ class EclecticiqAppConnector(BaseConnector):
                             'source_name': resp_source_name
                         }
                     )
+            #
+            action_result.add_extra_data(response)
+            action_result.add_data(parsed_response)
 
-            action_result.add_data(response)
             summary = action_result.update_summary({})
-            summary['parsed_response'] = parse_result
+            summary['total_count'] = len(response['hits']['hits'])
 
             return action_result.set_status(phantom.APP_SUCCESS, 'Entitie found in Threat Intelligence Platform.')
 
         elif len(response['hits']['hits']) == 0:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
             return action_result.set_status(phantom.APP_SUCCESS, 'Entitie not found in Threat Intelligence Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)

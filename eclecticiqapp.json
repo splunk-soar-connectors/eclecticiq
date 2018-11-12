@@ -95,23 +95,23 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.parsed_response",
+                    "data_path": "action_result.data.0",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*last_upd",
+                    "data_path": "action_result.data.0.*.last_upd",
                     "data_type": "string",
                     "column_name": "last_update",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.maliciosness",
+                    "data_path": "action_result.data.0.*.maliciosness",
                     "data_type": "string",
                     "column_name": "maliciosness",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.TIP_uri",
+                    "data_path": "action_result.data.0.*.TIP_uri",
                     "data_type": "string",
                     "column_name": "TIP_url",
                     "column_order": 3
@@ -172,27 +172,27 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.parsed_response",
+                    "data_path": "action_result.data.0",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*last_upd",
+                    "data_path": "action_result.data.0.*.last_upd",
                     "data_type": "string",
                     "column_name": "last_update",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.maliciosness",
+                    "data_path": "action_result.data.0.*.maliciosness",
                     "data_type": "string",
                     "column_name": "maliciosness",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.TIP_uri",
+                    "data_path": "action_result.data.0.*.TIP_uri",
                     "data_type": "string",
                     "column_name": "TIP_url",
                     "column_order": 3
-                },            
+                },          
                 {
                     "data_path": "action_result.message",
                     "data_type": "string"
@@ -255,27 +255,27 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.parsed_response",
+                    "data_path": "action_result.data.0",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*last_upd",
+                    "data_path": "action_result.data.0.*.last_upd",
                     "data_type": "string",
                     "column_name": "last_update",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.maliciosness",
+                    "data_path": "action_result.data.0.*.maliciosness",
                     "data_type": "string",
                     "column_name": "maliciosness",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.TIP_uri",
+                    "data_path": "action_result.data.0.*.TIP_uri",
                     "data_type": "string",
                     "column_name": "TIP_url",
                     "column_order": 3
-                },            
+                },             
                 {
                     "data_path": "action_result.message",
                     "data_type": "string"
@@ -332,27 +332,27 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.parsed_response",
+                    "data_path": "action_result.data.0",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*last_upd",
+                    "data_path": "action_result.data.0.*.last_upd",
                     "data_type": "string",
                     "column_name": "last_update",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.maliciosness",
+                    "data_path": "action_result.data.0.*.maliciosness",
                     "data_type": "string",
                     "column_name": "maliciosness",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.TIP_uri",
+                    "data_path": "action_result.data.0.*.TIP_uri",
                     "data_type": "string",
                     "column_name": "TIP_url",
                     "column_order": 3
-                },            
+                },          
                 {
                     "data_path": "action_result.message",
                     "data_type": "string"
@@ -409,27 +409,27 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.parsed_response",
+                    "data_path": "action_result.data.0",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*last_upd",
+                    "data_path": "action_result.data.0.*.last_upd",
                     "data_type": "string",
                     "column_name": "last_update",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.maliciosness",
+                    "data_path": "action_result.data.0.*.maliciosness",
                     "data_type": "string",
                     "column_name": "maliciosness",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.TIP_uri",
+                    "data_path": "action_result.data.0.*.TIP_uri",
                     "data_type": "string",
                     "column_name": "TIP_url",
                     "column_order": 3
-                },            
+                },             
                 {
                     "data_path": "action_result.message",
                     "data_type": "string"
@@ -648,47 +648,47 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.title",
+                    "data_path": "action_result.data.0.*.title",
                     "data_type": "string",
                     "column_name": "title",
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.data.parsed_response.*.description",
+                    "data_path": "action_result.data.0.*.description",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.threat_start",
+                    "data_path": "action_result.data.0.*.threat_start",
                     "data_type": "string",
                     "column_name": "threat_start",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.tags",
+                    "data_path": "action_result.data.0.*.tags",
                     "data_type": "string",
                     "column_name": "tags",
                     "column_order": 2
                 },                
                 {
-                    "data_path": "action_result.summary.parsed_response.*.extract_kind",
+                    "data_path": "action_result.data.0.*.extract_kind",
                     "data_type": "string",
                     "column_name": "extract_kind",
                     "column_order": 3
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.extract_value",
+                    "data_path": "action_result.data.0.*.extract_value",
                     "data_type": "string",
                     "column_name": "extract_value",
                     "column_order": 4
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.extract_classification",
+                    "data_path": "action_result.data.0.*.extract_classification",
                     "data_type": "string",
                     "column_name": "extract_classification",
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.summary.parsed_response.*.extract_confidence",
+                    "data_path": "action_result.data.0.*.extract_confidence",
                     "data_type": "string",
                     "column_name": "extract_confidence",
                     "column_order": 6
