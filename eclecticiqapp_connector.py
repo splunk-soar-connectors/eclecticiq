@@ -109,6 +109,9 @@ class EclecticiqAppConnector(BaseConnector):
         headers.update(self._headers)
         resp_json = None
 
+        if 'Authorization' not in headers.keys():
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), resp_json)
+
         try:
             request_func = getattr(requests, method)
         except AttributeError:
@@ -143,7 +146,10 @@ class EclecticiqAppConnector(BaseConnector):
         endpoint_uri = '/private/outgoing-feed-download/' + str(self._tip_of_id) + '/runs/latest'
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        uri_list = response['data']['content_blocks']
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        uri_list = response.get('data', {}).get('content_blocks', [])
 
         for k in range(len(uri_list)):
 
@@ -151,7 +157,7 @@ class EclecticiqAppConnector(BaseConnector):
 
             ret_val, response = self._make_rest_call(str(uri_list[k]), action_result, headers=self._headers)
 
-            if (phantom.is_fail(ret_val)):
+            if phantom.is_fail(ret_val):
                 return action_result.get_status()
 
             events = response.get('entities', [])
@@ -353,9 +359,11 @@ class EclecticiqAppConnector(BaseConnector):
 
         self.save_progress("Testing TIP availability by sending request to /status/ endpoint")
         ret_val, response = self._make_rest_call('/private/status', action_result, headers=self._headers)
-        if (phantom.is_fail(ret_val)):
+
+        if phantom.is_fail(ret_val):
             self.save_progress("Test Connectivity Failed.")
             return action_result.get_status()
+
         message_status = response['data']['celery_nodes_state']['health']
         self.save_progress("Test passed, TIP status: " + message_status)
         self.save_progress("-----------------------------------------")
@@ -364,9 +372,11 @@ class EclecticiqAppConnector(BaseConnector):
             self.save_progress("Testing Outgoing Feed availability")
             endpoint_uri = '/private/outgoing-feed-download/' + str(self._tip_of_id) + '/runs/latest'
             ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
-            if (phantom.is_fail(ret_val)):
+
+            if phantom.is_fail(ret_val):
                 self.save_progress("Outgoing Feed check Failed.")
                 return action_result.get_status()
+
             message_status = str(len(response['data']['content_blocks']))
             self.save_progress("Test passed, in Outgoing Feed: " + message_status + " blocks.")
             self.save_progress("-----------------------------------------")
@@ -375,9 +385,11 @@ class EclecticiqAppConnector(BaseConnector):
             self.save_progress("Testing Group ID resolving")
             group_uri = '/private/groups?filter[name]=' + str(self._tip_group)
             ret_val, response = self._make_rest_call(group_uri, action_result, headers=self._headers)
-            if (phantom.is_fail(ret_val)):
+
+            if phantom.is_fail(ret_val):
                 self.save_progress("Group ID Check Failed.")
                 return action_result.get_status()
+
             message_status = response['data'][0]['source']
             self.save_progress("Test passed, group ID: " + message_status)
 
@@ -396,7 +408,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -426,7 +438,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -456,7 +468,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -486,7 +498,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -516,7 +528,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -545,7 +557,7 @@ class EclecticiqAppConnector(BaseConnector):
 
         ret_val, response = self._make_rest_call(group_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         group_id = response['data'][0]['source']
@@ -601,7 +613,7 @@ class EclecticiqAppConnector(BaseConnector):
 
         ret_val, response = self._make_rest_call(sightings_uri, action_result, headers=self._headers, data=json.dumps(sighting), method="post")
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -631,7 +643,7 @@ class EclecticiqAppConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         action_result.add_data(response)
@@ -681,7 +693,6 @@ class EclecticiqAppConnector(BaseConnector):
         return ret_val
 
     def initialize(self):
-
         self._state = self.load_state()
 
         # get the asset config
@@ -704,9 +715,14 @@ class EclecticiqAppConnector(BaseConnector):
         data['username'] = config.get('tip_user')
         data['password'] = config.get('tip_password')
 
-        r = requests.post(auth_uri, headers=self._headers, data=json.dumps(data), verify=False)
+        try:
+            r = requests.post(auth_uri, headers=self._headers, data=json.dumps(data), verify=False)
+        except:
+            self.save_progress("Error while fetching the Request Digest token")
+            return phantom.APP_SUCCESS
 
-        self._headers['Authorization'] = 'Bearer ' + r.json()['token']
+        if r.json().get('token'):
+            self._headers['Authorization'] = 'Bearer ' + r.json().get('token')
 
         return phantom.APP_SUCCESS
 
@@ -743,9 +759,10 @@ if __name__ == '__main__':
         password = getpass.getpass("Password: ")
 
     if (username and password):
+        login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
             print ("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get(login_url, verify=False)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -755,10 +772,10 @@ if __name__ == '__main__':
 
             headers = dict()
             headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = 'https://127.0.0.1/login'
+            headers['Referer'] = login_url
 
             print ("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print ("Unable to get session id from the platfrom. Error: " + str(e))
