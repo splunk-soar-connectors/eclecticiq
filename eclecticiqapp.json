@@ -20,6 +20,7 @@
         "tip_uri": {
             "description": "EclecticIQ TIP url",
             "data_type": "string",
+            "required": true,
             "default": "https://tip_url.local",
             "order": 0
         },
