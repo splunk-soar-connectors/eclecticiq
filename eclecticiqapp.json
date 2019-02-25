@@ -543,6 +543,7 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
+            "verbose": "It is mandatory to provide the TIP group name in the asset configuration for this action to run successfully",
             "type": "contain",
             "read_only": false,
             "parameters": {
