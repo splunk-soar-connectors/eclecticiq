@@ -519,6 +519,9 @@ class EclecticIQ_api(object):
         except KeyError:
             pass
 
+        if 'Authorization' not in headers.keys():
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), resp_json)
+
         try:
             for i in parsed_response['data']['meta']['taxonomy']:
                 result['tags_list'].append(taxonomy.get(i))
@@ -1233,6 +1236,7 @@ class EclecticiqAppConnector(BaseConnector):
                                               entity_title=sighting_title, entity_description=sighting_description,
                                               entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
                                               entity_impact_value=sighting_impact_value)
+  
 
         action_result.add_data(sighting)
         summary = action_result.update_summary({})
@@ -1417,7 +1421,6 @@ class EclecticiqAppConnector(BaseConnector):
         return ret_val
 
     def initialize(self):
-
         self._state = self.load_state()
         # get the asset config
         config = self.get_config()
@@ -1469,9 +1472,10 @@ if __name__ == '__main__':
         password = getpass.getpass("Password: ")
 
     if (username and password):
+        login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
             print ("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get(login_url, verify=False)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -1481,10 +1485,10 @@ if __name__ == '__main__':
 
             headers = dict()
             headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = 'https://127.0.0.1/login'
+            headers['Referer'] = login_url
 
             print ("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print ("Unable to get session id from the platfrom. Error: " + str(e))
