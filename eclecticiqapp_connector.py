@@ -1,24 +1,785 @@
-# -----------------------------------------
-# Phantom sample App Connector python file
-# -----------------------------------------
-
 # Phantom App imports
 import phantom.app as phantom
 from phantom.base_connector import BaseConnector
 from phantom.action_result import ActionResult
 
-# Usage of the consts file is recommended
-# from eclecticiqapp_consts import *
 import requests
 import json
-from bs4 import BeautifulSoup
 import urllib
 import re
+
+import logging as eiq_logging
+import datetime
+import time
+
+API_PATHS = {
+    '2.1': {
+        'auth': '/api/auth',
+        'group_id_search': '/api/sources/',
+        'feeds_list': '/private/outgoing-feed-download/',
+        'feed_info': '/private/outgoing-feeds/',
+        'feed_content_blocks': '/private/outgoing-feed-download/',
+        'groups': '/private/groups/',
+        'entities': '/private/entities/',
+        'observable_search': '/api/observables/',
+        'entity_search': '/private/search-all/',
+        'entity_get': '/private/entities/',
+        'taxonomy_get': '/private/taxonomies/'
+    }
+}
+
+USER_AGENT = 'Phantom Integration'
+
+
+def format_ts(dt):
+    return dt.replace(microsecond=0).isoformat() + 'Z'
+
+
+def format_ts_human(dt):
+    return dt.replace(microsecond=0).isoformat() + 'Z'
 
 
 class RetVal(tuple):
     def __new__(cls, val1, val2=None):
         return tuple.__new__(RetVal, (val1, val2))
+
+
+class EclecticIQ_api(object):
+    def __init__(self,
+                 baseurl,
+                 eiq_version,
+                 username,
+                 password,
+                 verify_ssl=True,
+                 proxy_ip=None,
+                 proxy_username=None,
+                 proxy_password=None
+                 ):
+        self.eiq_username = username
+        self.eiq_password = password
+        self.baseurl = baseurl
+        self.verify_ssl = self.set_verify_ssl(verify_ssl)
+        self.proxy_ip = proxy_ip
+        self.proxy_username = proxy_username
+        self.proxy_password = proxy_password
+        self.proxies = self.set_eiq_proxy()
+        self.eiq_api_version = self.set_eiq_api_version(eiq_version)
+        self.eiq_datamodel_version = self.set_eiq_datamodel_version(eiq_version)
+        self.token_expires = 0
+        self.headers = {
+            'user-agent': USER_AGENT,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        self.get_outh_token()
+
+    def set_verify_ssl(self, ssl_status):
+        if ssl_status in ["1", "True", "true", True]:
+            return True
+        elif ssl_status in ["0", "False", "false", False]:
+            return False
+        else:
+            return True
+
+    def sanitize_eiq_url(self, eiq_url):
+        # TD
+        return
+
+    def sanitize_eiq_version(self, eiq_version):
+        if "." in eiq_version:
+            eiq_version = re.search(r"^\d+\.\d", eiq_version).group()
+            return float(eiq_version)
+        elif re.findall(r"fc\-essentials", eiq_version, flags=re.IGNORECASE):
+            return "FC-Essentials"
+        elif re.findall(r"fc\-spotlight", eiq_version, flags=re.IGNORECASE):
+            return "FC-Spotlight"
+        else:
+            # TD check code below
+            try:
+                eiq_version = re.search(r"^\d+\.\d", eiq_version).group()
+                return int(eiq_version)
+            except ValueError:
+                pass
+
+    def set_eiq_proxy(self):
+        # TD sanitize proxy?
+
+        if self.proxy_ip and self.proxy_username and self.proxy_password:
+            return {
+                'http': 'http://' + self.proxy_username + ':' + self.proxy_password + '@' + self.proxy_ip + '/',
+                'https': 'http://' + self.proxy_username + ':' + self.proxy_password + '@' + self.proxy_ip + '/',
+            }
+        elif self.proxy_ip:
+            return {
+                'http': 'http://' + self.proxy_ip + '/',
+                'https': 'http://' + self.proxy_ip + '/',
+            }
+        else:
+            return None
+
+    def set_eiq_api_version(self, eiq_version):
+        eiq_version = self.sanitize_eiq_version(eiq_version)
+
+        if (isinstance(eiq_version, float) or isinstance(eiq_version, int)) and eiq_version < 2.1:
+            return '2.0'
+        elif (isinstance(eiq_version, float) or isinstance(eiq_version, int)) and eiq_version >= 2.1:
+            return '2.1'
+        elif re.match(r"FC", eiq_version):
+            return 'FC'
+        else:
+            # TD add warning
+            return 'WARNING'
+
+    def set_eiq_datamodel_version(self, eiq_version):
+        eiq_version = self.sanitize_eiq_version(eiq_version)
+        if (isinstance(eiq_version, float) or isinstance(eiq_version, int)) and eiq_version < 2.2:
+            return "pre2.2"
+        elif (isinstance(eiq_version, float) or isinstance(eiq_version, int)) and eiq_version >= 2.2:
+            return "2.2"
+        elif eiq_version == "FC-Essentials":
+            return "FC-Essentials"
+        elif eiq_version == "FC-Spotlight":
+            return "FC-Spotlight"
+        else:
+            # TD add warning
+            return 'WARNING'
+
+    def get_outh_token(self):
+        eiq_logging.info('Authenticating using username: ' + str(self.eiq_username))
+        try:
+            r = requests.post(
+                self.baseurl + API_PATHS[self.eiq_api_version]['auth'],
+                headers=self.headers,
+                data=json.dumps({
+                    'username': self.eiq_username,
+                    'password': self.eiq_password
+                }),
+                verify=self.verify_ssl,
+                proxies=self.proxies,
+                timeout=30
+            )
+
+            if r and r.status_code in [100, 200, 201, 202]:
+                self.headers['Authorization'] = 'Bearer ' + r.json()['token']
+                self.token_expires = time.time() + 1500
+                eiq_logging.info('Authentication successful')
+            else:
+                if not r:
+                    msg = 'Could not perform auth request to EclecticIQ'
+                    eiq_logging.exception(msg)
+                    raise Exception(msg)
+                try:
+                    err = r.json()
+                    detail = err['errors'][0]['detail']
+                    msg = ('EclecticIQ VA returned an error, code:[{0}], reason:[{1}], URL: [{2}], details:[{3}]'
+                           .format(r.status_code, r.reason, r.url, detail))
+                except Exception:
+                    msg = ('EclecticIQ VA returned an error, code:[{0}], reason:[{1}], URL: [{2}]'
+                           .format(r.status_code, r.reason, r.url))
+                raise Exception(msg)
+
+        except Exception:
+            eiq_logging.error("Authentication failed")
+            raise
+
+    def send_api_request(self, method, path, params=None, data=None):
+
+        if self.token_expires < time.time():
+            self.get_outh_token()
+
+        url = self.baseurl + path
+
+        r = None
+        try:
+            if method == 'post':
+                r = requests.post(
+                    url,
+                    headers=self.headers,
+                    params=params,
+                    data=json.dumps(data),
+                    verify=self.verify_ssl,
+                    proxies=self.proxies,
+                    timeout=30
+                )
+            elif method == 'get':
+                r = requests.get(
+                    url,
+                    headers=self.headers,
+                    params=params,
+                    data=json.dumps(data),
+                    verify=self.verify_ssl,
+                    proxies=self.proxies,
+                    timeout=30
+                )
+            else:
+                eiq_logging.error("Unknown method: " + str(method))
+                raise Exception
+        except Exception:
+            eiq_logging.exception(
+                'Could not perform request to EclecticIQ VA: {}: {}'.format(method, url))
+
+        if r and r.status_code in [100, 200, 201, 202]:
+            return r
+        else:
+            if not r:
+                msg = ('Could not perform request to EclecticIQ VA: {}: {}'.format(method, url))
+                eiq_logging.exception(msg)
+                raise Exception(msg)
+
+            try:
+                err = r.json()
+                detail = err['errors'][0]['detail']
+                msg = ('EclecticIQ VA returned an error, code:[{0}], reason:[{1}], URL: [{2}], details:[{3}]'
+                       .format(
+                           r.status_code,
+                           r.reason,
+                           r.url,
+                           detail))
+            except Exception:
+                msg = ('EclecticIQ VA returned an error, code:[{0}], reason:[{1}], URL: [{2}]').format(
+                    r.status_code,
+                    r.reason,
+                    r.url)
+            raise Exception(msg)
+
+    def get_source_group_uid(self, group_name):
+        eiq_logging.info("Requesting source id for specified group, name=[" + str(group_name) + "]")
+        r = self.send_api_request(
+            'get',
+            path=API_PATHS[self.eiq_api_version]['groups'],
+            params='filter[name]=' + str(group_name))
+
+        if not r.json()['data']:
+            eiq_logging.error(
+                'Something went wrong fetching the group id. '
+                'Please note the source group name is case sensitive! '
+                'Received response:' + str(r.json()))
+            return "error_in_fetching_group_id"
+        else:
+            eiq_logging.info('Source group id received')
+            eiq_logging.debug('Source group id is: ' + str(r.json()['data'][0]['source']))
+            return r.json()['data'][0]['source']
+
+    def get_feed_info(self, feed_ids):
+        eiq_logging.info("Requesting feed info for  feed #{}".format(feed_ids))
+        feed_ids = (feed_ids.replace(" ", "")).split(',')
+        result = []
+
+        if self.eiq_api_version == "FC":
+            for k in feed_ids:
+                feed_result = {'id': k, 'created_at': '', 'update_strategy': 'REPLACE', 'packaging_status': 'SUCCESS'}
+                result.append(feed_result)
+            self.feeds_info = result
+            return result
+
+        for k in feed_ids:
+            feed_result = {}
+            try:
+                r = self.send_api_request(
+                    'get',
+                    path=API_PATHS[self.eiq_api_version]['feed_info'] + k)
+            except Exception:
+                eiq_logging.error('Feed #{} information cannot be requested.'.format(k))
+                continue
+
+            if not r.json()['data']:
+                eiq_logging.error('Feed #{} information cannot be requested. Received response:' + str(r.json())).format(k)
+                return "error_in_fetching_feed_info"
+            else:
+                eiq_logging.info('Feed #{} information requested'.format(k))
+                feed_result['id'] = r.json()['data']['id']
+                feed_result['created_at'] = r.json()['data']['created_at']
+                feed_result['update_strategy'] = r.json()['data']['update_strategy']
+                feed_result['packaging_status'] = r.json()['data']['packaging_status']
+                feed_result['name'] = r.json()['data']['name']
+                result.append(feed_result)
+                eiq_logging.debug('Feed #{} information retrieved succefully. Received response:' + json.dumps(feed_result) + ''.format(k))
+
+        return result
+
+    def download_block_list(self, block):
+        eiq_logging.debug("Downloading block url{0}".format(block))
+        r = self.send_api_request('get', path=str(block))
+        data = r.text
+
+        return data
+
+    def get_feed_content_blocks(self, feed, feed_last_run=None):
+        eiq_logging.info("Requesting block list for feed #{0}".format(feed['id']))
+
+        if feed['packaging_status'] == 'SUCCESS' and feed['update_strategy'] == 'REPLACE':
+            eiq_logging.info("Requesting block list for REPLACE feed.")
+
+            r = self.send_api_request(
+                'get',
+                path=API_PATHS[self.eiq_api_version]['feed_content_blocks'] + "{0}/runs/latest".format(feed['id']))
+
+            data = r.json()['data']['content_blocks']
+            eiq_logging.info("Received list contains {0} blocks for feed:{1}.".format(len(data), feed['id']))
+            return data
+
+        elif feed['packaging_status'] == 'SUCCESS' and (feed['update_strategy'] in ['APPEND', 'DIFF']):
+            eiq_logging.info("Requesting block list for {0} feed.".format(feed['update_strategy']))
+
+            r = self.send_api_request(
+                'get',
+                path=API_PATHS[self.eiq_api_version]['feed_content_blocks'] + "{0}".format(feed['id']))
+
+            data = r.json()['data']['content_blocks']
+
+            if feed_last_run is None:
+                feed_last_run = {}
+                feed_last_run['last_ingested'] = None
+                feed_last_run['created_at'] = None
+
+            if (feed['created_at'] != feed_last_run['created_at']) or feed_last_run['last_ingested'] is None:
+                eiq_logging.info(
+                    "Received list contains {0} blocks for {1} feed:{2}. Feed created time changed or first run, "
+                    "reingestion of all the feed content.".format(len(data), feed['update_strategy'], feed['id']))
+                return data
+            else:
+                try:
+                    last_ingested_index = data.index(feed_last_run['last_ingested'])
+                    diff_data = data[last_ingested_index + 1:]
+                    eiq_logging.info("Received list contains {0} blocks for {1} feed:{2}."
+                                     .format(len(diff_data), feed['update_strategy'], feed['id']))
+                    return diff_data
+                except ValueError:
+                    eiq_logging.error("Value of last ingested block not available in Feed {0}.".format(feed['id']))
+                    return None
+
+        elif feed['packaging_status'] == 'RUNNING':
+            eiq_logging.info("Feed #{0} is running now. Collecting data is not possible.".format(feed['id']))
+        else:
+            eiq_logging.info("Feed #{0} update strategy is not supported. Use Replace or Diff".format(feed['id']))
+
+    def get_group_name(self, group_id):
+        eiq_logging.info("Getting group name by id:{0}".format(group_id))
+        r = self.send_api_request(
+            'get',
+            path=API_PATHS[self.eiq_api_version]['group_id_search'] + str(group_id))
+
+        response = json.loads(r.text)
+        result = {}
+
+        result['name'] = response['data'].get('name', 'N/A')
+        result['type'] = response['data'].get('type', 'N/A')
+
+        return result
+
+    def lookup_observable(self, value, type):
+        """Method lookups specific observable by value and type.
+
+        Args:
+            value: value of Observable
+            type: type of observable, e.g. ipv4, hash-md5 etc
+
+        Returns:
+            Return dictionary with Observable details:
+             {created: date and time of creation,
+             last_updated: last update time,
+             maliciousness: value of maliciousness,
+             type: type of Observable from args ,
+             value: value of Observable from args,
+             source_name: who produced Observable,
+             platform_link: direct link o the platform
+             }
+
+            Otherwise returns None.
+
+        """
+        eiq_logging.info("Searching Observable:{0}, type:{1}".format(value, type))
+
+        r = self.send_api_request(
+            'get',
+            path=API_PATHS[self.eiq_api_version]['observable_search'],
+            params={'filter[type]': type, 'filter[value]': value})
+
+        observable_response = json.loads(r.text)
+
+        if observable_response['count'] == 1:
+            result = {}
+            # TD parsing result if there are more than one source id
+
+            source_name = self.get_group_name(observable_response['data'][0]['sources'][0])
+            result['created'] = str(observable_response['data'][0]['created_at'])[:16]
+            result['last_updated'] = str(observable_response['data'][0]['last_updated_at'])[:16]
+            result['maliciousness'] = observable_response['data'][0]['meta']['maliciousness']
+            result['type'] = observable_response['data'][0]['type']
+            result['value'] = observable_response['data'][0]['value']
+            result['source_name'] = str(source_name['type']) + ': ' + str(source_name['name'])
+            result['platform_link'] = self.baseurl + "/observables/" + type + "/" + urllib.quote_plus(value)
+
+            return result
+
+        elif observable_response['count'] > 1:
+            eiq_logging.info("Finding duplicates for observable:{0}, type:{1}, return first one".format(value, type))
+            result = {}
+            # TD parsing result if there are more than one source id
+
+            source_name = self.get_group_name(observable_response['data'][0]['sources'][0])
+            result['created'] = str(observable_response['data'][0]['created_at'])[:16]
+            result['last_updated'] = str(observable_response['data'][0]['last_updated_at'])[:16]
+            result['maliciousness'] = observable_response['data'][0]['meta']['maliciousness']
+            result['type'] = observable_response['data'][0]['type']
+            result['value'] = observable_response['data'][0]['value']
+            result['source_name'] = str(source_name['type']) + ': ' + str(source_name['name'])
+            result['platform_link'] = self.baseurl + "/observables/" + type + "/" + urllib.quote_plus(value)
+
+            return result
+
+        else:
+
+            return None
+
+    def get_taxonomy_dict(self):
+        """Method returns dictionary with all the available taxonomy in Platform.
+
+        Returns:
+            Return dictionary with {taxonomy ids:taxonomy title}. Otherwise returns False.
+
+        """
+        eiq_logging.info("Get all the taxonomy titles from Platform.")
+
+        r = self.send_api_request(
+            'get',
+            path=API_PATHS[self.eiq_api_version]['taxonomy_get'])
+
+        taxonomy = json.loads(r.text)
+        taxonomy_dict = {}
+
+        for i in taxonomy['data']:
+            try:
+                id = i['id']
+                name = i['name']
+
+                taxonomy_dict[id] = name
+            except KeyError:
+                continue
+
+        if len(taxonomy_dict) > 0:
+            return taxonomy_dict
+        else:
+            return False
+
+    def get_entity_by_id(self, entity_id):
+        """Method lookups specific entity by Id.
+
+        Args:
+            entity_id: Requested entity Id.
+
+        Returns:
+            Return dictionary with entity details:
+             {entity_title: value,
+             entity_type: value,
+             created_at: value,
+             source_name: value,
+             tags_list: [
+                tag and taxonomy list ...
+                ],
+             relationships_list: [
+                    {relationship_type: incoming/outgoing,
+                    connected_node: id,
+                    connected_node_type: value,
+                    connected_node_type: value
+                    }
+                relationship list ...
+                ],
+             observables_list: [
+                    {value: obs_value,
+                    type: obs_type
+                    },
+                    ...
+                ]
+             }
+
+            Otherwise returns False.
+
+        """
+        eiq_logging.info("Looking up Entity {0}.".format(entity_id))
+
+        r = self.send_api_request(
+            'get',
+            path=API_PATHS[self.eiq_api_version]['entity_get'] + str(entity_id))
+        parsed_response = json.loads(r.text)
+        taxonomy = self.get_taxonomy_dict()
+
+        result = dict()
+
+        result['entity_title'] = parsed_response['data']['meta'].get('title', 'N/A')
+        result['entity_type'] = parsed_response['data']['data'].get('type', 'N/A')
+        result['created_at'] = str(parsed_response['data'].get('created_at', 'N/A'))[:16]
+        source = self.get_group_name(parsed_response['data']['sources'][0].get('source_id', 'N/A'))
+        result['source_name'] = source['type'] + ': ' + source['name']
+        result['tags_list'] = []
+
+        try:
+            for i in parsed_response['data']['meta']['tags']:
+                result['tags_list'].append(i)
+        except KeyError:
+            pass
+
+        if 'Authorization' not in headers.keys():
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), resp_json)
+
+        try:
+            for i in parsed_response['data']['meta']['taxonomy']:
+                result['tags_list'].append(taxonomy.get(i))
+        except KeyError:
+            pass
+
+        result['observables_list'] = []
+
+        search_result = self.search_entity(entity_id=entity_id)
+
+        try:
+            for i in search_result[0]['_source']['extracts']:
+                observable_to_add = {'value': i['value'],
+                                     'type': i['kind']}
+                result['observables_list'].append(observable_to_add)
+        except (KeyError, TypeError):
+            pass
+
+        result['relationships_list'] = []
+
+        if len(parsed_response['data']['incoming_stix_relations']) > 0:
+            for i in parsed_response['data']['incoming_stix_relations']:
+                relationship_to_add = {'relationship_type': 'incoming',
+                                       'connected_node': i['data']['source'],
+                                       'connection_type': i['data']['key'],
+                                       'connected_node_type': i['data']['source_type']
+                                       }
+                result['relationships_list'].append(relationship_to_add)
+
+        if len(parsed_response['data']['outgoing_stix_relations']) > 0:
+            for i in parsed_response['data']['outgoing_stix_relations']:
+                relationship_to_add = {'relationship_type': 'outgoing',
+                                       'connected_node': i['data']['target'],
+                                       'connection_type': i['data']['key'],
+                                       'connected_node_type': i['data']['target_type']
+                                       }
+                result['relationships_list'].append(relationship_to_add)
+
+        return result
+
+    def search_entity(self, entity_value=None, entity_type=None, entity_id=None, observable_value=None):
+        """Method search specific entity by specific search conditions.
+
+        Note: search works with wildcards for entity value and with strict conditions for everything else.
+            Also, it's recommended to use this method to lookup entity name based on the entity ID, because it doesnt
+            return all the relationships.
+
+            if you need to find specific entity - search by entity id
+            if you need to find all the entities with specific observables extracted - search with observable values
+
+        Args:
+            entity_value: entity value to search. add " or * to make search wildcard or strict
+            entity_type: value to search
+            entity_id: entity id to search
+            observable_value: observable value to search inside entity
+
+        Returns:
+            Return dictionary with all the entity details.
+            Otherwise returns False.
+
+        """
+        eiq_logging.info("Searching Entity:{0} with extracted observable:{1}, type:{2}"
+                         .format(entity_value, observable_value, entity_type))
+
+        query_list = []
+
+        if entity_value is not None:
+            if entity_value[0] == '"' and entity_value[-1] == '"':
+                entity_value = entity_value[1:-1]
+                entity_value = entity_value.replace('"', '\\"')
+                entity_value = '"' + entity_value + '"'
+            else:
+                entity_value = entity_value.replace('"', '\\"')
+
+            query_list.append("data.title:" + entity_value)
+
+        if observable_value is not None:
+            query_list.append("extracts.value:\"" + observable_value + "\"")
+
+        if entity_type is not None:
+            query_list.append("data.type:" + entity_type)
+
+        if entity_id is not None:
+            query_list.append("id:\"" + entity_id + "\"")
+
+        search_dict = {
+                "query": {
+                    "query_string": {
+                        "query": str(" AND ".join(query_list))
+                    }
+                }
+            }
+
+        r = self.send_api_request(
+            'post',
+            path=API_PATHS[self.eiq_api_version]['entity_search'],
+            data=search_dict)
+
+        search_response = json.loads(r.text)
+
+        if len(search_response['hits']['hits']) > 0:
+            return search_response['hits']['hits']
+        else:
+            return False
+
+    def create_entity(self, observable_dict, source_group_name, entity_title, entity_description,
+                      entity_confidence='Medium', entity_tags=None, entity_type='eclecticiq-sighting',
+                      entity_impact_value="None"):
+
+        """Method creates entity in Platform.
+
+        Args:
+            observable_dict: list of dictionaries with observables to create. Format:
+                [{
+                observable_type: "value",
+                observable_value: value,
+                observable_maliciousness: high/medium/low,
+                observable_classification: good/bad
+                }]
+            source_group_name: group name in Platform for Source. Case sensitive.
+            entity_title: value
+            entity_description: value
+            entity_confidence: Low/Medium/High
+            entity_tags: list of strings
+            entity_type: type of entity. e.g. indicator, ttp, eclecticiq-sighting etc
+            entity_impact_value: "None", "Unknown", "Low", "Medium", "High"
+
+        Returns:
+            Return created entity id if successful otherwise returns False.
+
+        """
+        eiq_logging.debug("Creating Entity in EclecticIQ Platform. Type:{0}, title:{1}"
+                          .format(entity_type, entity_title))
+
+        group_id = self.get_source_group_uid(source_group_name)
+
+        today = datetime.datetime.utcnow().date()
+
+        today_begin = format_ts(datetime.datetime(today.year, today.month, today.day, 0, 0, 0))
+        threat_start = format_ts(datetime.datetime.utcnow())
+
+        observable_dict_to_add = []
+        record = {}
+
+        for i in observable_dict:
+            record = {}
+
+            if entity_type == 'eclecticiq-sighting':
+                record['link_type'] = "sighted"
+            else:
+                record['link_type'] = "observed"
+
+            if i.get('observable_maliciousness', "") in ["low", "medium", "high"]:
+                record['confidence'] = i['observable_maliciousness']
+
+            if i.get('observable_classification', "") in ["bad", "good", "unknown"]:
+                record['classification'] = i['observable_classification']
+
+            if i.get('observable_value', ""):
+                record['value'] = i['observable_value']
+            else:
+                continue
+
+            if i.get('observable_type', "") in ["asn", "country", "cve", "domain", "email", "email-subject", "file", "handle",
+                                        "hash-md5", "hash-sha1", "hash-sha256", "hash-sha512", "industry", "ipv4",
+                                        "ipv6", "malware", "name", "organization", "port", "snort", "uri", "yara"]:
+                record['kind'] = i['observable_type']
+            else:
+                continue
+
+            observable_dict_to_add.append(record)
+
+        if self.eiq_datamodel_version == '2.2':
+            entity = {"data": {
+                "data": {
+                    "confidence": {
+                        "type": "confidence",
+                        "value": entity_confidence
+                    },
+                    "description": entity_description,
+                    "description_structuring_format": "html",
+                    "impact": {
+                        "type": "statement",
+                        "value": entity_impact_value,
+                        "value_vocab": "{http://stix.mitre.org/default_vocabularies-1}HighMediumLowVocab-1.0",
+                    },
+                    "type": entity_type,
+                    "title": entity_title,
+                    "security_control": {
+                        "type": "information-source",
+                        "identity": {
+                            "name": "3rd party Sightings script",
+                            "type": "identity"
+                        },
+                        "time": {
+                            "type": "time",
+                            "start_time": today_begin,
+                            "start_time_precision": "second"
+                        }
+                    },
+                },
+                "meta": {
+                    "manual_extracts": observable_dict_to_add,
+                    "taxonomy": [],
+                    "estimated_threat_start_time": threat_start,
+                    "tags": entity_tags,
+                    "ingest_time": threat_start
+                },
+                "sources": [{
+                    "source_id": group_id
+                }]
+            }}
+        else:
+            # TD recheck
+            entity = {"data": {
+                "data": {
+                    "confidence": {
+                        "type": "confidence",
+                        "value": "Low"
+                    },
+                    "description": entity_description,
+                    "related_extracts": observable_dict_to_add,
+                    "description_structuring_format": "html",
+                    "type": entity_type,
+                    "title": entity_title,
+                    "security_control": {
+                        "type": "information-source",
+                        "identity": {
+                            "name": "EclecticIQ Platform App for Splunk",
+                            "type": "identity"
+                        },
+                        "time": {
+                            "type": "time",
+                            "start_time": today_begin,
+                            "start_time_precision": "second"
+                        }
+                    },
+                },
+                "meta": {
+                    "source": group_id,
+                    "taxonomy": [],
+                    "estimated_threat_start_time": threat_start,
+                    "tags": ["Splunk Alert"],
+                    "ingest_time": threat_start
+                }
+            }}
+
+        r = self.send_api_request(
+            'post',
+            path=API_PATHS[self.eiq_api_version]['entities'],
+            data=entity)
+
+        entity_response = json.loads(r.text)
+
+        try:
+            return entity_response['data']['id']
+        except KeyError:
+            return False
 
 
 class EclecticiqAppConnector(BaseConnector):
@@ -30,615 +791,428 @@ class EclecticiqAppConnector(BaseConnector):
         self._headers = None
         self._base_url = None
 
-    def _process_empty_reponse(self, response, action_result):
-
-        if response.status_code == 200:
-            return RetVal(phantom.APP_SUCCESS, {})
-        return RetVal(action_result.set_status(phantom.APP_ERROR, "Empty response and no information in the header"), None)
-
-    def _process_html_response(self, response, action_result):
-
-        status_code = response.status_code
-
-        try:
-            soup = BeautifulSoup(response.text, "html.parser")
-            error_text = soup.text
-            split_lines = error_text.split('\n')
-            split_lines = [x.strip() for x in split_lines if x.strip()]
-            error_text = '\n'.join(split_lines)
-        except:
-            error_text = "Cannot parse error details"
-
-        message = "Status Code: {0}. Data from server:\n{1}\n".format(status_code,
-                error_text)
-
-        message = message.replace('{', '{{').replace('}', '}}')
-
-        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
-
-    def _process_json_response(self, r, action_result):
-
-        try:
-            resp_json = r.json()
-        except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Unable to parse JSON response. Error: {0}".format(str(e))), None)
-
-        # Please specify the status codes here
-        if 200 <= r.status_code < 399:
-            return RetVal(phantom.APP_SUCCESS, resp_json)
-
-        # You should process the error returned in the json
-        message = "Error from server. Status Code: {0} Data from server: {1}".format(
-                r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
-
-        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
-
-    def _process_response(self, r, action_result):
-
-        # store the r_text in debug data, it will get dumped in the logs if the action fails
-        if hasattr(action_result, 'add_debug_data'):
-            action_result.add_debug_data({'r_status_code': r.status_code})
-            action_result.add_debug_data({'r_text': r.text})
-            action_result.add_debug_data({'r_headers': r.headers})
-
-        # Process each 'Content-Type' of response separately
-        # Process a json response
-        if 'json' or 'octet-stream' in r.headers.get('Content-Type', ''):
-            return self._process_json_response(r, action_result)
-
-        # Process an HTML resonse, Do this no matter what the api talks.
-        # There is a high chance of a PROXY in between phantom and the rest of
-        # world, in case of errors, PROXY's return HTML, this function parses
-        # the error and adds it to the action_result.
-        if 'html' in r.headers.get('Content-Type', ''):
-            return self._process_html_response(r, action_result)
-
-        # it's not content-type that is to be parsed, handle an empty response
-        if not r.text:
-            return self._process_empty_reponse(r, action_result)
-
-        # everything else is actually an error at this point
-        message = "Can't process response from server. Status Code: {0} Data from server: {1}".format(
-                r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
-
-        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
-
-    def _make_rest_call(self, endpoint, action_result, headers={}, params=None, data=None, method="get"):
-
-        config = self.get_config()
-        headers.update(self._headers)
-        resp_json = None
-
-        if 'Authorization' not in headers.keys():
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), resp_json)
-
-        try:
-            request_func = getattr(requests, method)
-        except AttributeError:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid method: {0}".format(method)), resp_json)
-
-        # Create a URL to connect to
-        url = self._base_url + endpoint
-
-        try:
-            r = request_func(
-                            url,
-                            data=data,
-                            headers=headers,
-                            verify=config.get('verify_server_cert', False),
-                            params=params)
-        except Exception as e:
-            return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
-
-        return self._process_response(r, action_result)
-
     def _handle_on_poll(self, param):
-
-        # TD check limitations in feed, how many containers and artifacts to ingest
-        # TD self._tip_of_id availabilty before run anything
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         if self._tip_of_id == "None":
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Outgoing Feed ID in asset parameters"), None)
 
-        endpoint_uri = '/private/outgoing-feed-download/' + str(self._tip_of_id) + '/runs/latest'
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        artifact_count = param.get("artifact_count", 0)
+        container_count = param.get("container_count", 0)
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        feed_info = self.eiq_api.get_feed_info(self._tip_of_id)
 
-        uri_list = response.get('data', {}).get('content_blocks', [])
+        if feed_info[0]['update_strategy'] not in ['REPLACE', 'APPEND']:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Outgoing feed update strategy not supported."), None)
+        elif feed_info[0]['packaging_status'] != 'SUCCESS':
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Outgoing feed is running now. Wait for run"
+                                                                      " complete first."), None)
 
-        for k in range(len(uri_list)):
+        if feed_info[0]['update_strategy'] == 'REPLACE':
+            feed_content_block_list = self.eiq_api.get_feed_content_blocks(feed=feed_info[0])
+            containers_processed = 0
+            artifacts_processed = 0
 
-            self.send_progress("Processing block # {0}".format(k))
+            for idx, record in enumerate(feed_content_block_list):
+                if containers_processed >= container_count != 0:
+                    self.send_progress("Reached container polling limit: {0}".format(containers_processed))
+                    return self.set_status(phantom.APP_SUCCESS)
 
-            ret_val, response = self._make_rest_call(str(uri_list[k]), action_result, headers=self._headers)
+                if artifacts_processed >= artifact_count != 0:
+                    self.send_progress("Reached artifacts polling limit: {0}".format(artifacts_processed))
+                    return self.set_status(phantom.APP_SUCCESS)
 
-            if phantom.is_fail(ret_val):
-                return action_result.get_status()
+                self.send_progress("Processing block # {0}".format(idx))
+                downloaded_block = json.loads(self.eiq_api.download_block_list(record))
 
-            events = response.get('entities', [])
+                events = downloaded_block.get('entities', [])
+                results = []
 
-            results = []
+                for i in events:
+                    idref = i['meta'].get('is_unresolved_idref', False)
 
-            for i, event in enumerate(events):
-                self.send_progress("Processing Container # {0}".format(i))
+                    if i['data']['type'] != "relation" and idref is not True:
+                        container = {}
+                        container['data'] = i
+                        container['source_data_identifier'] = "EIQ Platform, OF: {0}, id#{1}. Entity id:{2}"\
+                            .format(feed_info[0]["name"], feed_info[0]["id"], i['id'])
 
-                try:
-                    idref = event['meta']['is_unresolved_idref']
-                except KeyError:
-                    idref = False
+                        container['name'] = i['data'].get('title', 'No Title') + " - type: "\
+                                            + i['data'].get('type', 'No Type')
 
-                if event['data']['type'] != "relation" and idref is not True:
-                    container = dict()
-                    container['data'] = event
-                    container['source_data_identifier'] = event['id']
-                    try:
-                        container['name'] = event['data']['title']
-                    except KeyError:
-                        container['name'] = 'No Title'
-                    container['name'] += " - type: "
-                    try:
-                        container['name'] += event['data']['type']
-                    except KeyError:
-                        container['name'] = 'No Type'
+                        container['id'] = i['id']
 
-                    container['name'] = event['data']['title'] + " - type:" + event['data']['type']
-                    container['id'] = event['id']
+                        if i['meta'].get('tlp_color', "") in ["RED", "AMBER", "GREEN", "WHITE"]:
+                            container['sensitivity'] = i['meta'].get('tlp_color', "").lower()
 
-                    try:
-                        sensitivity = event['meta']['tlp_color']
-                        if sensitivity in ["RED", "AMBER", "GREEN", "WHITE"]:
-                            container['sensitivity'] = sensitivity.lower()
-                        else:
-                            container['sensitivity'] = ''
-                    except KeyError:
-                        pass
+                        try:
+                            severity = i['data']['impact']['value']
+                            if severity in ["High", "Medium", "Low"]:
+                                container['severity'] = severity.lower()
+                        except KeyError:
+                            pass
 
-                    try:
-                        severity = event['data']['impact']['value']
-                        if severity in ["High", "Medium", "Low"]:
-                            container['severity'] = severity.lower()
-                        else:
-                            container['severity'] = ''
-                    except KeyError:
-                        pass
+                        container['tags'] = i["meta"]["tags"]
 
-                    container['tags'] = []
+                        if len(i["meta"].get("taxonomy_paths", "")) > 0:
+                            for ii in i["meta"]["taxonomy_paths"]:
+                                container['tags'].append(ii[-1])
 
-                    try:
-                        if len(event["meta"]["tags"]) > 0:
-                            for i in range(len(event["meta"]["tags"])):
-                                container['tags'].append(event["meta"]["tags"][i])
-                    except KeyError:
-                        pass
+                        artifacts = self._create_artifacts_for_event(i)
+                        results.append({'container': container, 'artifacts': artifacts})
 
-                    try:
-                        if len(event["meta"]["taxonomy_paths"]) > 0:
-                            for i in range(len(event["meta"]["taxonomy_paths"])):
-                                container['tags'].append(event["meta"]["taxonomy_paths"][i][-1])
-                    except KeyError:
-                        pass
+                containers_processed, artifacts_processed = \
+                    self._save_results(results, containers_processed, artifacts_processed, artifact_count, container_count)
 
-                    artifacts = self._create_artifacts_for_event(event, i)
-                    results.append({'container': container, 'artifacts': artifacts})
+        elif feed_info[0]['update_strategy'] == 'APPEND':
+            feed_last_run = {}
+            feed_last_run['last_ingested'] = self._state.get('last_ingested', None)
+            feed_last_run['created_at'] = self._state.get('created_at', None)
 
-            self._save_results(results)
+            feed_content_block_list = self.eiq_api.get_feed_content_blocks(feed=feed_info[0], feed_last_run=feed_last_run)
+            containers_processed = 0
+            artifacts_processed = 0
+
+            for idx, record in enumerate(feed_content_block_list):
+                if containers_processed >= container_count != 0:
+                    self._state['last_ingested'] = str(record)
+                    self._state['created_at'] = feed_info[0]['created_at']
+                    self.save_state(self._state)
+
+                    self.send_progress("Reached container polling limit: {0}".format(containers_processed))
+                    return self.set_status(phantom.APP_SUCCESS)
+
+                if artifacts_processed >= artifact_count != 0:
+                    self._state['last_ingested'] = str(record)
+                    self._state['created_at'] = feed_info[0]['created_at']
+                    self.save_state(self._state)
+
+                    self.send_progress("Reached artifacts polling limit: {0}".format(artifacts_processed))
+                    return self.set_status(phantom.APP_SUCCESS)
+
+                self.send_progress("Processing block # {0}".format(idx))
+                downloaded_block = json.loads(self.eiq_api.download_block_list(record))
+
+                events = downloaded_block.get('entities', [])
+                results = []
+
+                for i in events:
+                    idref = i['meta'].get('is_unresolved_idref', False)
+
+                    if i['data']['type'] != "relation" and idref is not True:
+                        container = {}
+                        container['data'] = i
+                        container['source_data_identifier'] = "EIQ Platform, OF: {0}, id#{1}. Entity id:{2}"\
+                            .format(feed_info[0]["name"], feed_info[0]["id"], i['id'])
+
+                        container['name'] = i['data'].get('title', 'No Title') + " - type: "\
+                                            + i['data'].get('type', 'No Type')
+
+                        container['id'] = i['id']
+
+                        if i['meta'].get('tlp_color', "") in ["RED", "AMBER", "GREEN", "WHITE"]:
+                            container['sensitivity'] = i['meta'].get('tlp_color', "").lower()
+
+                        try:
+                            severity = i['data']['impact']['value']
+                            if severity in ["High", "Medium", "Low"]:
+                                container['severity'] = severity.lower()
+                        except KeyError:
+                            pass
+
+                        container['tags'] = i["meta"]["tags"]
+
+                        if len(i["meta"].get("taxonomy_paths", "")) > 0:
+                            for ii in i["meta"]["taxonomy_paths"]:
+                                container['tags'].append(ii[-1])
+
+                        artifacts = self._create_artifacts_for_event(i)
+                        results.append({'container': container, 'artifacts': artifacts})
+
+                containers_processed, artifacts_processed = \
+                    self._save_results(results, containers_processed, artifacts_processed, artifact_count, container_count)
+
+                self._state['last_ingested'] = str(record)
+                self._state['created_at'] = feed_info[0]['created_at']
+                self.save_state(self._state)
 
         return self.set_status(phantom.APP_SUCCESS)
 
-    def _save_results(self, results):
+    def _save_results(self, results, containers_processed, artifacts_processed, artifacts_limit, containers_limit):
+        for idx, item in enumerate(results):
+            self.send_progress("Adding Container # {0}".format(idx))
 
-        containers_processed = 0
-        for i, result in enumerate(results):
+            if containers_processed < containers_limit or containers_limit == 0:
+                ret_val, response, container_id = self.save_container(item['container'])
+                self.debug_print("save_container returns, value: {0}, reason: {1}, id: {2}".format(ret_val, response, container_id))
+                containers_processed += 1
+                if phantom.is_fail(ret_val):
+                    continue
+            else:
+                return containers_processed, artifacts_processed
 
-            # result is a dictionary of a single container and artifacts
-            if ('container' not in result):
-                continue
-
-            if ('artifacts' not in result):
-                # igonore containers without artifacts
-                continue
-
-            if (len(result['artifacts']) == 0):
-                # igonore containers without artifacts
-                continue
-
-            containers_processed += 1
-
-            self.send_progress("Adding Container # {0}".format(i))
-            ret_val, response, container_id = self.save_container(result['container'])
-            self.debug_print("save_container returns, value: {0}, reason: {1}, id: {2}".format(ret_val, response, container_id))
-
-            if (phantom.is_fail(ret_val)):
-                continue
-
-            if (not container_id):
-                continue
-
-            if ('artifacts' not in result):
-                continue
-
-            artifacts = result['artifacts']
-
-            # get the length of the artifact, we might have trimmed it or not
+            artifacts = item['artifacts']
             len_artifacts = len(artifacts)
 
-            for j, artifact in enumerate(artifacts):
+            for idx2, artifact in enumerate(artifacts):
+                if artifacts_processed < artifacts_limit or artifacts_limit == 0:
+                    if (idx2 + 1) == len_artifacts:
+                        # mark it such that active playbooks get executed
+                        artifact['run_automation'] = True
 
-                # if it is the last artifact of the last container
-                if ((j + 1) == len_artifacts):
-                    # mark it such that active playbooks get executed
-                    artifact['run_automation'] = True
+                    artifact['container_id'] = container_id
+                    self.send_progress("Adding Container # {0}, Artifact # {1}".format(idx, idx2))
+                    ret_val, status_string, artifact_id = self.save_artifact(artifact)
+                    artifacts_processed += 1
+                    self.debug_print("save_artifact returns, value: {0}, reason: {1}, id: {2}".format(ret_val, status_string, artifact_id))
+                else:
+                    return containers_processed, artifacts_processed
 
-                artifact['container_id'] = container_id
-                self.send_progress("Adding Container # {0}, Artifact # {1}".format(i, j))
-                ret_val, status_string, artifact_id = self.save_artifact(artifact)
-                self.debug_print("save_artifact returns, value: {0}, reason: {1}, id: {2}".format(ret_val, status_string, artifact_id))
+        return containers_processed, artifacts_processed
 
-        return containers_processed
-
-    def _create_artifacts_for_event(self, event, container_index):
-
+    def _create_artifacts_for_event(self, event):
         artifacts = []
-
         observables = event.get('extracts')
 
-        if (not observables):
+        if not observables:
             return artifacts
 
-        # event_id = event['id']
-
-        for i, observation in enumerate(observables):
-
-            self.send_progress("Processing Container # {0} Artifact # {1}".format(container_index, i))
-
+        for i in observables:
             artifact = dict()
 
-            artifact['data'] = observation
-            artifact['source_data_identifier'] = observation['value']
-            artifact['name'] = (observation['kind']).capitalize() + " Artifact"
+            artifact['data'] = i
+            artifact['source_data_identifier'] = i['value']
+            artifact['name'] = (i['kind']).capitalize() + " Artifact"
             artifact['cef'] = cef = dict()
-            cef['observationId'] = observation['value']
-            cef['msg'] = "EclectiIQ Threat Intelligence observable"
+            cef['observationId'] = i['value']
+            cef['msg'] = "EclecticIQ Threat Intelligence observable"
 
-            try:
-                if observation['meta']['classification']:
-                    cef['cs2'] = observation['meta']['classification']
-                    cef['cs2Label'] = "EclecticIQClassification"
-            except KeyError:
-                pass
+            if i['meta'].get('classification', ""):
+                cef['cs2'] = i['meta']['classification']
+                cef['cs2Label'] = "EclecticIQClassification"
 
-            try:
-                if observation['meta']['confidence']:
-                    cef['cs3'] = observation['meta']['confidence']
-                    cef['cs3Label'] = "EclecticIQConfidence"
-            except KeyError:
-                pass
+            if i['meta'].get('confidence', ""):
+                cef['cs3'] = i['meta']['confidence']
+                cef['cs3Label'] = "EclecticIQConfidence"
 
-            try:
-                kind = observation['kind']
-                if kind == "ipv4":
-                    cef['sourceAddress'] = observation['value']
-                elif kind == "domain":
-                    cef['sourceAddress'] = observation['value']
-                elif kind == "uri":
-                    cef['requestURL'] = observation['value']
-                elif kind == "email":
-                    cef['suser'] = observation['value']
-                elif kind in ["hash-md5", "hash-sha1", "hash-sha256", "hash-sha512"]:
-                    cef['cs1'] = kind
-                    cef['cs1Label'] = "HashType"
-                    cef['fileHash'] = observation['value']
-                    cef['hash'] = observation['value']
-                else:
-                    cef['cs1'] = kind
-                    cef['cs1Label'] = "EIQ_Kind"
-                    cef['cs2'] = observation['value']
-                    cef['cs2Label'] = "EIQ_Value"
-            except KeyError:
-                pass
+            kind = i.get('kind', "")
+
+            if kind in ["ipv4", "domain"]:
+                cef['sourceAddress'] = i['value']
+            elif kind == "uri":
+                cef['requestURL'] = i['value']
+            elif kind == "email":
+                cef['suser'] = i['value']
+            elif kind in ["hash-md5", "hash-sha1", "hash-sha256", "hash-sha512"]:
+                cef['cs1'] = kind
+                cef['cs1Label'] = "HashType"
+                cef['fileHash'] = i['value']
+                cef['hash'] = i['value']
+            else:
+                cef['cs1'] = kind
+                cef['cs1Label'] = "EIQ_Kind"
+                cef['cs2'] = i['value']
+                cef['cs2Label'] = "EIQ_Value"
 
             artifacts.append(artifact)
 
         return artifacts
 
     def _handle_test_connectivity(self, param):
-
-        # TD add visual delimitation of checks and add conditions for checkings group ID and feed ID for polling
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        self.save_progress("Testing TIP availability by sending request to /status/ endpoint")
-        ret_val, response = self._make_rest_call('/private/status', action_result, headers=self._headers)
+        self.save_progress("Testing EclecticIQ Platform availability.")
 
-        if phantom.is_fail(ret_val):
-            self.save_progress("Test Connectivity Failed.")
+        if self.eiq_api.headers.get('Authorization', False):
+            self.save_progress("Test passed, authorization successful.")
+        else:
+            self.save_progress("Connectivity and auth test failed.")
             return action_result.get_status()
 
-        message_status = response['data']['celery_nodes_state']['health']
-        self.save_progress("Test passed, TIP status: " + message_status)
-        self.save_progress("-----------------------------------------")
-
-        if self._tip_of_id != "None":
+        if self._tip_of_id is not None:
+            self.save_progress("-----------------------------------------")
             self.save_progress("Testing Outgoing Feed availability")
-            endpoint_uri = '/private/outgoing-feed-download/' + str(self._tip_of_id) + '/runs/latest'
-            ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+            outgoing_feed = self.eiq_api.get_feed_info(self._tip_of_id)
 
-            if phantom.is_fail(ret_val):
+            if not outgoing_feed[0]:
                 self.save_progress("Outgoing Feed check Failed.")
                 return action_result.get_status()
 
-            message_status = str(len(response['data']['content_blocks']))
+            try:
+                outgoing_feed_block_list = self.eiq_api.get_feed_content_blocks(outgoing_feed[0])
+                self.save_progress("Outgoing Feed is available in the Platform. There are {0} blocks inside."
+                                   .format(len(outgoing_feed_block_list)))
+            except Exception as e:
+                self.save_progress("Cannot collect data from Outgoing Feed. Check user permissions. Exception:" + e)
 
             try:
-                endpoint_uri = str(response['data']['content_blocks'][0])
-                ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
-                cf_result = action_result._ActionResult__status_message
-                if cf_result.startswith("Unable to parse JSON response"):
-                    self.save_progress("Content test of Outgoing Feed failed. Check content type of Outgoing Feed in Platform. It must be JSON")
-                else:
-                    self.save_progress("Content test of Outgoing Feed passed")
-            except Exception:
-                self.save_progress("Content test of Outgoing Feed failed. Check content of Outgoing Feed in Platform")
+                test_block = self.eiq_api.download_block_list(outgoing_feed_block_list[0])
+                json.loads(test_block)
+                self.save_progress("Content test of Outgoing Feed passed.")
+            except Exception as e:
+                self.save_progress("Content type test of Outgoing Feed failed."
+                                   " Check Content type in Platform. Exception:" + e)
 
-            self.save_progress("Test passed, in Outgoing Feed: " + message_status + " blocks")
+        if self._tip_group is not None:
             self.save_progress("-----------------------------------------")
+            self.save_progress("Testing Platform Group ID resolving")
 
-        if self._tip_group != "None":
-            self.save_progress("Testing Group ID resolving")
-            group_uri = '/private/groups?filter[name]=' + str(self._tip_group)
-            ret_val, response = self._make_rest_call(group_uri, action_result, headers=self._headers)
-
-            if phantom.is_fail(ret_val):
-                self.save_progress("Group ID Check Failed.")
-                return action_result.get_status()
-
-            message_status = response['data'][0]['source']
-            self.save_progress("Test passed, group ID: " + message_status)
+            try:
+                group_id = self.eiq_api.get_source_group_uid(self._tip_group)
+                self.save_progress("Test passed, group ID: " + group_id)
+            except Exception as e:
+                self.save_progress("Group ID Check Failed. Exception:" + e)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_domain_reputation(self, param):
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # Access action parameters passed in the 'param' dictionary
-        # Required values can be accessed directly
         domain = param['domain']
-        endpoint_uri = "/api/observables?filter[type]=domain&filter[value]=" + urllib.quote_plus(domain)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        lookup_result = self.eiq_api.lookup_observable(domain, 'domain')
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        if lookup_result is None:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
+            return action_result.set_status(phantom.APP_SUCCESS, 'Domain not found in EclecticIQ Platform.')
 
-        if response['total_count'] > 0:
-            parsed_response = []
-            for k in response['data']:
-                resp_upd = k.setdefault('last_updated_at', 'None')
-                resp_malic = k['meta'].setdefault('maliciousness', 'None')
-                resp_value = k.setdefault('value', 'None')
-                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(domain)
-                parsed_response.append(
-                    {
-                        'last_upd': resp_upd,
-                        'maliciosness': resp_malic,
-                        'value': resp_value,
-                        'TIP_uri': resp_tip_uri
-                    }
-                )
-
-            # Add the response into the data section
-            action_result.add_extra_data(response)
+        elif isinstance(lookup_result, dict):
+            parsed_response = {
+                    'last_updated': lookup_result['last_updated'],
+                    'maliciousness': lookup_result['maliciousness'],
+                    'value': lookup_result['value'],
+                    'platform_link': lookup_result['platform_link'],
+                    'source_name': lookup_result['source_name'],
+                    'created': lookup_result['created']
+                }
             action_result.add_data(parsed_response)
 
             summary = action_result.update_summary({})
-            summary['total_count'] = response['total_count']
+            summary['total_count'] = '1'
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'Domain found in Threat Intelligence Platform')
-        elif response['total_count'] == 0:
-            summary = action_result.update_summary({})
-            summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'Domain not found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'Domain found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
-        return action_result.set_status(phantom.APP_SUCCESS)
-
     def _handle_email_reputation(self, param):
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # Access action parameters passed in the 'param' dictionary
-        # Required values can be accessed directly
         email = param['email']
-        endpoint_uri = "/api/observables?filter[type]=email&filter[value]=" + urllib.quote_plus(email)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        lookup_result = self.eiq_api.lookup_observable(email, 'email')
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        if lookup_result is None:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
+            return action_result.set_status(phantom.APP_SUCCESS, 'Email not found in EclecticIQ Platform.')
 
-        if response['total_count'] > 0:
-            parsed_response = []
-            for k in response['data']:
-                resp_upd = k.setdefault('last_updated_at', 'None')
-                resp_malic = k['meta'].setdefault('maliciousness', 'None')
-                resp_value = k.setdefault('value', 'None')
-                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(email)
-
-                parsed_response.append(
-                    {
-                        'last_upd': resp_upd,
-                        'maliciosness': resp_malic,
-                        'value': resp_value,
-                        'TIP_uri': resp_tip_uri
-                    }
-                )
-
-            # Add the response into the data section
-            action_result.add_extra_data(response)
+        elif isinstance(lookup_result, dict):
+            parsed_response = {
+                    'last_updated': lookup_result['last_updated'],
+                    'maliciousness': lookup_result['maliciousness'],
+                    'value': lookup_result['value'],
+                    'platform_link': lookup_result['platform_link'],
+                    'source_name': lookup_result['source_name'],
+                    'created': lookup_result['created']
+                }
             action_result.add_data(parsed_response)
 
             summary = action_result.update_summary({})
-            summary['total_count'] = response['total_count']
+            summary['total_count'] = '1'
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'Email found in Threat Intelligence Platform')
-        elif response['total_count'] == 0:
-            summary = action_result.update_summary({})
-            summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'Email not found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'Email found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_file_reputation(self, param):
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # Access action parameters passed in the 'param' dictionary
-        # Required values can be accessed directly
         file_hash = param['hash']
-        endpoint_uri = "/api/observables?filter[type]=file,hash-md5,hash-sha1,hash-sha256,hash-sha512&filter[value]=" + urllib.quote_plus(file_hash)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        lookup_result = self.eiq_api.lookup_observable(file_hash, 'file,hash-md5,hash-sha1,hash-sha256,hash-sha512')
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        if lookup_result is None:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
+            return action_result.set_status(phantom.APP_SUCCESS, 'File hash not found in EclecticIQ Platform.')
 
-        if response['total_count'] > 0:
-            parsed_response = []
-            for k in response['data']:
-                resp_upd = k.setdefault('last_updated_at', 'None')
-                resp_malic = k['meta'].setdefault('maliciousness', 'None')
-                resp_value = k.setdefault('value', 'None')
-                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(file_hash)
-
-                parsed_response.append(
-                    {
-                        'last_upd': resp_upd,
-                        'maliciosness': resp_malic,
-                        'value': resp_value,
-                        'TIP_uri': resp_tip_uri
-                    }
-                )
-
-            # Add the response into the data section
-            action_result.add_extra_data(response)
+        elif isinstance(lookup_result, dict):
+            parsed_response = {
+                    'last_updated': lookup_result['last_updated'],
+                    'maliciousness': lookup_result['maliciousness'],
+                    'value': lookup_result['value'],
+                    'platform_link': lookup_result['platform_link'],
+                    'source_name': lookup_result['source_name'],
+                    'created': lookup_result['created']
+                }
             action_result.add_data(parsed_response)
 
             summary = action_result.update_summary({})
-            summary['total_count'] = response['total_count']
+            summary['total_count'] = '1'
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in Threat Intelligence Platform')
-        elif response['total_count'] == 0:
-            summary = action_result.update_summary({})
-            summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'File hash not found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_ip_reputation(self, param):
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # Access action parameters passed in the 'param' dictionary
-        # Required values can be accessed directly
         ip = param['ip']
-        endpoint_uri = "/api/observables?filter[type]=ipv4&filter[value]=" + urllib.quote_plus(ip)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        lookup_result = self.eiq_api.lookup_observable(ip, 'ipv4')
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        if lookup_result is None:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
+            return action_result.set_status(phantom.APP_SUCCESS, 'IP not found in EclecticIQ Platform.')
 
-        if response['total_count'] > 0:
-            parsed_response = []
-            for k in response['data']:
-                resp_upd = k.setdefault('last_updated_at', 'None')
-                resp_malic = k['meta'].setdefault('maliciousness', 'None')
-                resp_value = k.setdefault('value', 'None')
-                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(ip)
-
-                parsed_response.append(
-                    {
-                        'last_upd': resp_upd,
-                        'maliciosness': resp_malic,
-                        'value': resp_value,
-                        'TIP_uri': resp_tip_uri
-                    }
-                )
-
-            # Add the response into the data section
-            action_result.add_extra_data(response)
+        elif isinstance(lookup_result, dict):
+            parsed_response = {
+                    'last_updated': lookup_result['last_updated'],
+                    'maliciousness': lookup_result['maliciousness'],
+                    'value': lookup_result['value'],
+                    'platform_link': lookup_result['platform_link'],
+                    'source_name': lookup_result['source_name'],
+                    'created': lookup_result['created']
+                }
             action_result.add_data(parsed_response)
 
             summary = action_result.update_summary({})
-            summary['total_count'] = response['total_count']
+            summary['total_count'] = '1'
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'IP found in Threat Intelligence Platform')
-        elif response['total_count'] == 0:
-            summary = action_result.update_summary({})
-            summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'IP not found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'IP found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_url_reputation(self, param):
-
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # Access action parameters passed in the 'param' dictionary
-        # Required values can be accessed directly
         url = param['url']
-        endpoint_uri = "/api/observables?filter[type]=uri&filter[value]=" + urllib.quote_plus(url)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        lookup_result = self.eiq_api.lookup_observable(url, 'uri')
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        if lookup_result is None:
+            summary = action_result.update_summary({})
+            summary['total_count'] = '0'
+            return action_result.set_status(phantom.APP_SUCCESS, 'URL not found in EclecticIQ Platform.')
 
-        if response['total_count'] > 0:
-            parsed_response = []
-            for k in response['data']:
-                resp_upd = k.setdefault('last_updated_at', 'None')
-                resp_malic = k['meta'].setdefault('maliciousness', 'None')
-                resp_value = k.setdefault('value', 'None')
-                resp_tip_uri = self._base_url + '/observables/' + str(response['data'][0]['type']) + '/' + urllib.quote_plus(url)
-
-                parsed_response.append(
-                    {
-                        'last_upd': resp_upd,
-                        'maliciosness': resp_malic,
-                        'value': resp_value,
-                        'TIP_uri': resp_tip_uri
-                    }
-                )
-
-            # Add the response into the data section
-            action_result.add_extra_data(response)
+        elif isinstance(lookup_result, dict):
+            parsed_response = {
+                    'last_updated': lookup_result['last_updated'],
+                    'maliciousness': lookup_result['maliciousness'],
+                    'value': lookup_result['value'],
+                    'platform_link': lookup_result['platform_link'],
+                    'source_name': lookup_result['source_name'],
+                    'created': lookup_result['created']
+                }
             action_result.add_data(parsed_response)
 
             summary = action_result.update_summary({})
-            summary['total_count'] = response['total_count']
+            summary['total_count'] = '1'
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'URL found in Threat Intelligence Platform.')
-        elif response['total_count'] == 0:
-            summary = action_result.update_summary({})
-            summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'URL not found in Threat Intelligence Platform.')
+            return action_result.set_status(phantom.APP_SUCCESS, 'URL found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -650,140 +1224,161 @@ class EclecticiqAppConnector(BaseConnector):
         if self._tip_group == "None":
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
 
-        group_uri = '/private/groups?filter[name]=' + str(self._tip_group)
+        observables_dict = self._prepare_observables(param)
 
-        ret_val, response = self._make_rest_call(group_uri, action_result, headers=self._headers)
-
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
-
-        group_id = response['data'][0]['source']
-
-        sighting_type = param['sighting_type']
-        sighting_value = param['sighting_value']
         sighting_conf_value = param['confidence_value']
         sighting_title = param['sighting_title']
         sighting_tags = param['tags'].split(",")
+        sighting_impact_value = param.get('impact_value')
+        sighting_description = param.get('sighting_description', "")
 
-        try:
-            sighting_description = param['description']
-        except KeyError:
-            sighting_description = ""
-            pass
+        sighting = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
+                                              entity_title=sighting_title, entity_description=sighting_description,
+                                              entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
+                                              entity_impact_value=sighting_impact_value)
+  
 
-        sighting = {
-            "data": {
-                "data": {
-                    "confidence": {
-                        "type": "confidence",
-                        "value": sighting_conf_value
-                    },
-                    "description": sighting_description,
-                    "related_extracts": [{
-                        "type": "eclecticiq-extract",
-                        "kind": sighting_type,
-                        "value": sighting_value
-                    }],
-                    "description_structuring_format": "html",
-                    "type": "eclecticiq-sighting",
-                    "title": sighting_title,
-                    "security_control": {
-                        "type": "information-source",
-                        "identity": {
-                            "name": "EclecticIQ App for Phantom",
-                            "type": "identity"
-                        }
-                    }
-                },
-                "meta": {
-                    "taxonomy": [],
-                    "tags": sighting_tags
-                    # ["Phantom Sighting"]
-                },
-                "sources": [{
-                    "source_id": str(group_id)
-                }]
-            }
-        }
-
-        sightings_uri = '/private/entities/'
-
-        ret_val, response = self._make_rest_call(sightings_uri, action_result, headers=self._headers, data=json.dumps(sighting), method="post")
-
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
-
-        # Add the response into the data section
-        action_result.add_data(response)
-
-        # Add a dictionary that is made up of the most important values from data into the summary
+        action_result.add_data(sighting)
         summary = action_result.update_summary({})
 
-        try:
-            len(response['data'])
+        if sighting is not False:
             summary['important_data'] = 'Sighting was created in Threat Intelligence Platform.'
             return action_result.set_status(phantom.APP_SUCCESS)
-        except:
+        else:
             summary['important_data'] = 'Sighting wasnt created in Threat Intelligence Platform.'
             return action_result.set_status(phantom.APP_ERROR)
+
+    def _prepare_observables(self, param):
+        observable_params = [
+            (
+                param['sighting_maliciousness'],
+                param['sighting_type'],
+                param['sighting_value'],
+            ),
+            (
+                param.get('observable_2_maliciousness'),
+                param.get('observable_2_type'),
+                param.get('observable_2_value'),
+            ),
+            (
+                param.get('observable_3_maliciousness'),
+                param.get('observable_3_type'),
+                param.get('observable_3_value'),
+            ),
+        ]
+        observables_list = []
+
+        maliciousness_to_meta = {
+            "Malicious (High confidence)": {
+                "classification": "bad",
+                "confidence": "high",
+            },
+            "Malicious (Medium confidence)": {
+                "classification": "bad",
+                "confidence": "medium",
+            },
+            "Malicious (Low confidence)": {
+                "classification": "bad",
+                "confidence": "low",
+            },
+            "Safe": {
+                "classification": "good",
+            },
+            "Unknown": {
+            },
+        }
+
+        for observable in observable_params:
+            record = dict(
+                observable_type=observable[1],
+                observable_value=observable[2])
+
+            record["observable_maliciousness"] = maliciousness_to_meta[observable[0]].get("confidence", "")
+            record["observable_classification"] = maliciousness_to_meta[observable[0]].get("classification", "")
+
+            observables_list.append(record)
+
+        return observables_list
 
     def _handle_query_entities(self, param):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
-
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        query = param['query']
-        endpoint_uri = "/private/search-all?q=extracts.value:{0}&type=indicator".format(query)
+        query = param.get('query', None)
 
-        # make rest call
-        ret_val, response = self._make_rest_call(endpoint_uri, action_result, headers=self._headers)
+        if param['entity_type'] == "all":
+            entity_type = '("campaign" OR "course-of-action" OR "exploit-target" OR "incident" OR' \
+                          ' "indicator" OR "threat-actor" OR "ttp")'
+        else:
+            entity_type = param['entity_type']
+        entity_value = param.get('entity_value', None)
 
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
+        query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
 
-        parsed_response = []
+        if query_result is not False:
+            for k in query_result:
+                parsed_response = {}
+                if len(k['_source']['extracts']) > 0:
+                    for kk in k['_source']['extracts']:
+                        response_classification = kk['meta'].get('classification', 'N/A')
+                        response_confidence = kk['meta'].get('confidence', 'N/A')
+                        response_kind = kk.get('kind', 'N/A')
+                        response_value = kk.get('value', 'N/A')
+                        response_title = k['_source']['data'].get('title', 'N/A')
+                        response_type = k['_source']['data'].get('type', 'N/A')
+                        response_description = k['_source']['data'].get('description', 'N/A')
+                        response_threat_start = k['_source']['meta'].get('estimated_threat_start_time', 'N/A')
+                        response_tags = ''
+                        response_source_name = k['_source']['sources'][0].get('name', 'N/A')
+                        response_tags = ', '.join(k['_source']['tags'])
+                        parsed_response = {
+                                'extract_kind': response_kind,
+                                'extract_value': response_value,
+                                'extract_classification': response_classification,
+                                'extract_confidence': response_confidence,
+                                'title': response_title,
+                                'type': response_type,
+                                'description': response_description,
+                                'threat_start': response_threat_start,
+                                'tags': response_tags,
+                                'source_name': response_source_name
+                            }
+                        action_result.add_data(parsed_response)
+                else:
+                    response_classification = 'N/A'
+                    response_confidence = 'N/A'
+                    response_kind = 'N/A'
+                    response_value = 'N/A'
+                    response_title = k['_source']['data'].get('title', 'N/A')
+                    response_description = k['_source']['data'].get('description', 'N/A')
+                    response_threat_start = k['_source']['meta'].get('estimated_threat_start_time', 'N/A')
+                    response_tags = ''
+                    response_source_name = k['_source']['sources'][0].get('name', 'N/A')
+                    response_tags = ', '.join(k['_source']['tags'])
+                    parsed_response = {
+                        'extract_kind': response_kind,
+                        'extract_value': response_value,
+                        'extract_classification': response_classification,
+                        'extract_confidence': response_confidence,
+                        'title': response_title,
+                        'description': response_description,
+                        'threat_start': response_threat_start,
+                        'tags': response_tags,
+                        'source_name': response_source_name
+                    }
+                    action_result.add_data(parsed_response)
 
-        if len(response['hits']['hits']) > 0:
-            for k in response['hits']['hits']:
-                for kk in k['_source']['extracts']:
-                    resp_classification = kk['meta'].setdefault('classification', 'None')
-                    resp_confidence = kk['meta'].setdefault('confidence', 'None')
-                    resp_kind = kk.setdefault('kind', 'None')
-                    resp_value = kk.setdefault('value', 'None')
-                    resp_title = k['_source']['data'].setdefault('title', 'None')
-                    resp_description = k['_source']['data'].setdefault('description', 'None')
-                    resp_threat_start = k['_source']['meta'].setdefault('estimated_threat_start_time', 'None')
-                    resp_tags = ''
-                    resp_source_name = k['_source']['sources'][0].setdefault('name', 'None')
-                    resp_tags = ', '.join(k['_source']['tags'])
-                    parsed_response.append(
-                        {
-                            'extract_kind': resp_kind,
-                            'extract_value': resp_value,
-                            'extract_classification': resp_classification,
-                            'extract_confidence': resp_confidence,
-                            'title': resp_title,
-                            'description': resp_description,
-                            'threat_start': resp_threat_start,
-                            'tags': resp_tags,
-                            'source_name': resp_source_name
-                        }
-                    )
-            #
-            action_result.add_extra_data(response)
-            action_result.add_data(parsed_response)
-
+            action_result.add_extra_data(query_result)
             summary = action_result.update_summary({})
-            summary['total_count'] = len(response['hits']['hits'])
+            summary['total_count'] = len(query_result)
 
-            return action_result.set_status(phantom.APP_SUCCESS, 'Entitie found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'Entity found in EclecticIQ Platform.')
 
-        elif len(response['hits']['hits']) == 0:
+        elif query_result is False:
             summary = action_result.update_summary({})
             summary['total_count'] = '0'
-            return action_result.set_status(phantom.APP_SUCCESS, 'Entitie not found in Threat Intelligence Platform')
+            return action_result.set_status(phantom.APP_SUCCESS, 'No entities found in EclecticIQ Platform.')
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -827,35 +1422,20 @@ class EclecticiqAppConnector(BaseConnector):
 
     def initialize(self):
         self._state = self.load_state()
-
         # get the asset config
         config = self.get_config()
 
-        self._base_url = re.sub(r"(https?\:\/\/[^\/]+)(.*)", r"\1", config['tip_uri'])
-        try:
-            self._tip_of_id = config['tip_of_id']
-        except:
-            self._tip_of_id = "None"
+        self.eiq_api = EclecticIQ_api(baseurl=config['tip_uri'],
+                                      eiq_version='2.4',
+                                      username=config['tip_user'],
+                                      password=config['tip_password'],
+                                      verify_ssl=config.get('tip_ssl_check', False),
+                                      proxy_ip=config.get('tip_proxy_uri', None),
+                                      proxy_password=config.get('tip_proxy_password', None),
+                                      proxy_username=config.get('tip_proxy_user', None))
 
-        try:
-            self._tip_group = config['tip_group']
-        except:
-            self._tip_group = "None"
-
-        auth_uri = self._base_url + '/api/auth'
-        self._headers = {'user-agent': 'Phantom Cyber', 'Content-Type': 'application/json', 'Accept': 'application/json'}
-        data = dict()
-        data['username'] = config.get('tip_user')
-        data['password'] = config.get('tip_password')
-
-        try:
-            r = requests.post(auth_uri, headers=self._headers, data=json.dumps(data), verify=False)
-        except:
-            self.save_progress("Error while fetching the Request Digest token")
-            return phantom.APP_SUCCESS
-
-        if r.json().get('token'):
-            self._headers['Authorization'] = 'Bearer ' + r.json().get('token')
+        self._tip_group = config.get('tip_group', None)
+        self._tip_of_id = config.get('tip_of_id', None)
 
         return phantom.APP_SUCCESS
 
