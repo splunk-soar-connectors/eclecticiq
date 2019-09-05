@@ -10,12 +10,11 @@
     "product_version_regex": ".*",
     "publisher": "EclecticIQ",
     "license": "Copyright (c) EclecticIQ, 2019",
-    "app_version": "1.0.0",
+    "app_version": "1.1.1",
     "utctime_updated": "2018-08-15T17:36:45.850532Z",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.pyc",
     "min_phantom_version": "4.0.1068",
-    "app_wizard_version": "1.0.0",
     "configuration": {
         "tip_uri": {
             "description": "EclecticIQ TIP url",
@@ -89,14 +88,12 @@
                         "domain",
                         "url"
                     ],
-                    "column_name": "domain",
+                    "column_name": "Domain",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
                     "example_values": [
                         "success"
                     ]
@@ -127,7 +124,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.*.meta.maliciousness",
+                    "data_path": "action_result.data.*.last_upd",
+                    "data_type": "string",
+                    "column_name": "Last Update",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.maliciosness",
                     "data_type": "string",
                     "example_values": [
                         "unknown"
@@ -136,14 +139,14 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.TIP_uri",
+                    "data_path": "action_result.data.*.TIP_uri",
                     "data_type": "string",
-                    "column_name": "TIP link",
-                    "column_order": 3,
                     "contains": [
                         "domain",
                         "url"
-                    ]
+                    ],
+                    "column_name": "TIP URL",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -181,14 +184,12 @@
                     "contains": [
                         "email"
                     ],
-                    "column_name": "email",
+                    "column_name": "Email",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
                     "example_values": [
                         "success"
                     ]
@@ -219,7 +220,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.*.meta.maliciousness",
+                    "data_path": "action_result.data.*.last_upd",
+                    "data_type": "string",
+                    "column_name": "Last Update",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.maliciosness",
                     "data_type": "string",
                     "example_values": [
                         "unknown"
@@ -228,13 +235,13 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.TIP_uri",
+                    "data_path": "action_result.data.*.TIP_uri",
                     "data_type": "string",
-                    "column_name": "TIP link",
-                    "column_order": 3,
                     "contains": [
                         "email"
-                    ]
+                    ],
+                    "column_name": "TIP URL",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -278,14 +285,12 @@
                         "sha1",
                         "md5"
                     ],
-                    "column_name": "hash",
+                    "column_name": "Hash",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
                     "example_values": [
                         "success"
                     ]
@@ -316,7 +321,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.*.meta.maliciousness",
+                    "data_path": "action_result.data.*.last_upd",
+                    "data_type": "string",
+                    "column_name": "Last Update",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.maliciosness",
                     "data_type": "string",
                     "example_values": [
                         "unknown"
@@ -325,16 +336,16 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.TIP_uri",
+                    "data_path": "action_result.data.*.TIP_uri",
                     "data_type": "string",
-                    "column_name": "TIP link",
-                    "column_order": 3,
                     "contains": [
                         "hash",
                         "sha256",
                         "sha1",
                         "md5"
-                    ]
+                    ],
+                    "column_name": "TIP URL",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -372,7 +383,7 @@
                     "contains": [
                         "ip"
                     ],
-                    "column_name": "ip",
+                    "column_name": "IP",
                     "column_order": 0,
                     "example_values": [
                         "195.88.144.81"
@@ -381,8 +392,6 @@
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
                     "example_values": [
                         "success"
                     ]
@@ -416,7 +425,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.*.meta.maliciousness",
+                    "data_path": "action_result.data.*.last_upd",
+                    "data_type": "string",
+                    "column_name": "Last Update",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.maliciosness",
                     "data_type": "string",
                     "example_values": [
                         "unknown"
@@ -425,16 +440,13 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.TIP_uri",
+                    "data_path": "action_result.data.*.TIP_uri",
                     "data_type": "string",
-                    "column_name": "TIP link",
-                    "column_order": 3,
-                    "example_values": [
-                        "https://10.0.4.46/observables/ipv4/195.88.144.81"
-                    ],
                     "contains": [
-                        "url"
-                    ]
+                        "ip"
+                    ],
+                    "column_name": "TIP URL",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -475,14 +487,12 @@
                     "contains": [
                         "url"
                     ],
-                    "column_name": "url",
+                    "column_name": "URL",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
                     "example_values": [
                         "success"
                     ]
@@ -513,7 +523,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.*.meta.maliciousness",
+                    "data_path": "action_result.data.*.last_upd",
+                    "data_type": "string",
+                    "column_name": "Last Update",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.maliciosness",
                     "data_type": "string",
                     "example_values": [
                         "unknown"
@@ -522,13 +538,13 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.summary.TIP_uri",
+                    "data_path": "action_result.data.*.TIP_uri",
                     "data_type": "string",
-                    "column_name": "TIP link",
-                    "column_order": 3,
                     "contains": [
                         "url"
-                    ]
+                    ],
+                    "column_name": "TIP URL",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -616,13 +632,12 @@
                 {
                     "data_path": "action_result.parameter.sighting_description",
                     "data_type": "string",
-                    "column_name": "sighting_description"
+                    "column_name": "Sighting Description",
+                    "column_order": 1
                 },
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 0,
                     "example_values": [
                         "success"
                     ]
@@ -630,10 +645,9 @@
                 {
                     "data_path": "action_result.message",
                     "data_type": "string",
-                    "column_order": 1,
                     "example_values": [
                         "",
-                        "Important data: Sighting was creadted in Threat Intelligence Platform."
+                        "Important data: Sighting was created in Threat Intelligence Platform"
                     ]
                 },
                 {
@@ -653,6 +667,8 @@
                 {
                     "data_path": "action_result.parameter.tags",
                     "data_type": "string",
+                    "column_name": "Tags",
+                    "column_order": 5,
                     "example_values": [
                         "Phantom Sighting, Automatically created, Strange IP"
                     ]
@@ -660,6 +676,8 @@
                 {
                     "data_path": "action_result.parameter.confidence_value",
                     "data_type": "string",
+                    "column_name": "Confidence Value",
+                    "column_order": 4,
                     "example_values": [
                         "None"
                     ]
@@ -667,6 +685,8 @@
                 {
                     "data_path": "action_result.parameter.sighting_type",
                     "data_type": "string",
+                    "column_name": "Sighting Type",
+                    "column_order": 2,
                     "example_values": [
                         "ipv4"
                     ]
@@ -674,6 +694,8 @@
                 {
                     "data_path": "action_result.parameter.sighting_title",
                     "data_type": "string",
+                    "column_name": "Sighting Title",
+                    "column_order": 0,
                     "example_values": [
                         "Sighting created by Phantom"
                     ]
@@ -1030,12 +1052,14 @@
                     "data_path": "action_result.summary.important_data",
                     "data_type": "string",
                     "example_values": [
-                        "Sighting was creadted in Threat Intelligence Platform."
+                        "Sighting was created in Threat Intelligence Platform"
                     ]
                 },
                 {
                     "data_path": "action_result.parameter.sighting_value",
                     "data_type": "string",
+                    "column_name": "Sighting Value",
+                    "column_order": 3,
                     "example_values": [
                         "222.222.222.222"
                     ]
@@ -1122,6 +1146,52 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.data.*.title",
+                    "data_type": "string",
+                    "column_name": "title",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.description",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.threat_start",
+                    "data_type": "string",
+                    "column_name": "threat_start",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.tags",
+                    "data_type": "string",
+                    "column_name": "tags",
+                    "column_order": 2
+                },                
+                {
+                    "data_path": "action_result.data.*.extract_kind",
+                    "data_type": "string",
+                    "column_name": "extract_kind",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.extract_value",
+                    "data_type": "string",
+                    "column_name": "extract_value",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.extract_classification",
+                    "data_type": "string",
+                    "column_name": "extract_classification",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.*.extract_confidence",
+                    "data_type": "string",
+                    "column_name": "extract_confidence",
+                    "column_order": 6
+                },
+                {
                     "data_path": "action_result.data.*.hits.hits.*._type",
                     "data_type": "string",
                     "example_values": [
@@ -1173,7 +1243,7 @@
                     "data_path": "action_result.data.*.hits.hits.*._source.data.description",
                     "data_type": "string",
                     "example_values": [
-                        "This IP address 87.237.198.245 has been identified as a command and control site for Citadel malware by cybercrime-tracker.net. For more detailed infomation about this indicator go to [CAUTION!!Read-URL-Before-Click] [http://cybercrime-tracker.net/index.php]."
+                        "This IP address 80.237.198.245 has been identified as a command and control site for Test malware by test-tracker.net. For more detailed infomation about this indicator go to [CAUTION!!Read-URL-Before-Click] [http://test-tracker.net/index.php]"
                     ],
                     "column_name": "description",
                     "column_order": 6
