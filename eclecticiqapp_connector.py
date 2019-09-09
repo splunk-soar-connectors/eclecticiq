@@ -158,7 +158,6 @@ class EclecticIQ_api(object):
                 proxies=self.proxies,
                 timeout=30
             )
-
             if r and r.status_code in [100, 200, 201, 202]:
                 self.headers['Authorization'] = 'Bearer ' + r.json()['token']
                 self.token_expires = time.time() + 1500
@@ -180,7 +179,7 @@ class EclecticIQ_api(object):
 
         except Exception:
             eiq_logging.error("Authentication failed")
-            raise
+            raise Exception("Authentication failed. Please provide valid credentials")
 
     def send_api_request(self, method, path, params=None, data=None):
 
@@ -498,6 +497,8 @@ class EclecticIQ_api(object):
         """
         eiq_logging.info("Looking up Entity {0}.".format(entity_id))
 
+        action_result = self.add_action_result(ActionResult(None))
+
         r = self.send_api_request(
             'get',
             path=API_PATHS[self.eiq_api_version]['entity_get'] + str(entity_id))
@@ -520,7 +521,7 @@ class EclecticIQ_api(object):
             pass
 
         if 'Authorization' not in headers.keys():
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), resp_json)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid credentials. Unable to fetch the authorization token"), None)
 
         try:
             for i in parsed_response['data']['meta']['taxonomy']:
@@ -1236,7 +1237,6 @@ class EclecticiqAppConnector(BaseConnector):
                                               entity_title=sighting_title, entity_description=sighting_description,
                                               entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
                                               entity_impact_value=sighting_impact_value)
-  
 
         action_result.add_data(sighting)
         summary = action_result.update_summary({})
@@ -1425,14 +1425,18 @@ class EclecticiqAppConnector(BaseConnector):
         # get the asset config
         config = self.get_config()
 
-        self.eiq_api = EclecticIQ_api(baseurl=config['tip_uri'],
-                                      eiq_version='2.4',
-                                      username=config['tip_user'],
-                                      password=config['tip_password'],
-                                      verify_ssl=config.get('tip_ssl_check', False),
-                                      proxy_ip=config.get('tip_proxy_uri', None),
-                                      proxy_password=config.get('tip_proxy_password', None),
-                                      proxy_username=config.get('tip_proxy_user', None))
+        try:
+            self.eiq_api = EclecticIQ_api(baseurl=config['tip_uri'],
+                                        eiq_version='2.4',
+                                        username=config['tip_user'],
+                                        password=config['tip_password'],
+                                        verify_ssl=config.get('tip_ssl_check', False),
+                                        proxy_ip=config.get('tip_proxy_uri', None),
+                                        proxy_password=config.get('tip_proxy_password', None),
+                                        proxy_username=config.get('tip_proxy_user', None))
+        except Exception as e:
+            self.set_status(phantom.APP_ERROR, str(e))
+            return phantom.APP_ERROR
 
         self._tip_group = config.get('tip_group', None)
         self._tip_of_id = config.get('tip_of_id', None)
