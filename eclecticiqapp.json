@@ -10,7 +10,7 @@
     "product_version_regex": ".*",
     "publisher": "EclecticIQ",
     "license": "Copyright (c) EclecticIQ, 2019",
-    "app_version": "1.1.1",
+    "app_version": "1.2.0",
     "utctime_updated": "2019-08-01T17:36:45.850532Z",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.pyc",
