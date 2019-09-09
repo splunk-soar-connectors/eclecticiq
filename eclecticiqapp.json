@@ -14,7 +14,7 @@
     "utctime_updated": "2019-08-01T17:36:45.850532Z",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.pyc",
-    "min_phantom_version": "4.0.1068",
+    "min_phantom_version": "4.2.7532",
     "configuration": {
         "tip_uri": {
             "description": "EclecticIQ Platform address",
@@ -60,8 +60,8 @@
             "order": 6
         },
         "ph": {
-        "data_type": "ph",
-        "order": 7
+            "data_type": "ph",
+            "order": 7
         },
         "tip_proxy_user": {
             "description": "Proxy server username",
@@ -108,6 +108,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.domain",
                     "data_type": "string",
                     "contains": [
@@ -118,16 +126,14 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.0",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
+                    "data_type": "string",
+                    "column_name": "created",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
@@ -148,16 +154,14 @@
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.0.created",
-                    "data_type": "string",
-                    "column_name": "created",
-                    "column_order": 3
-                },
-                {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
                     "column_name": "source_name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -170,10 +174,6 @@
                 {
                     "data_path": "summary.total_objects_successful",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -201,6 +201,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.email",
                     "data_type": "string",
                     "contains": [
@@ -210,16 +218,14 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.0",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
+                    "data_type": "string",
+                    "column_name": "created",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
@@ -240,16 +246,14 @@
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.0.created",
-                    "data_type": "string",
-                    "column_name": "created",
-                    "column_order": 3
-                },
-                {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
                     "column_name": "source_name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -262,10 +266,6 @@
                 {
                     "data_path": "summary.total_objects_successful",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -296,6 +296,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "contains": [
@@ -308,16 +316,14 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.0",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
+                    "data_type": "string",
+                    "column_name": "created",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
@@ -338,16 +344,14 @@
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.0.created",
-                    "data_type": "string",
-                    "column_name": "created",
-                    "column_order": 3
-                },
-                {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
                     "column_name": "source_name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -360,10 +364,6 @@
                 {
                     "data_path": "summary.total_objects_successful",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -391,6 +391,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.ip",
                     "data_type": "string",
                     "contains": [
@@ -400,16 +408,14 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.0",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
+                    "data_type": "string",
+                    "column_name": "created",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
@@ -430,16 +436,14 @@
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.0.created",
-                    "data_type": "string",
-                    "column_name": "created",
-                    "column_order": 3
-                },
-                {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
                     "column_name": "source_name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -452,10 +456,6 @@
                 {
                     "data_path": "summary.total_objects_successful",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -483,6 +483,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.url",
                     "data_type": "string",
                     "contains": [
@@ -492,16 +500,14 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.0",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
+                    "data_type": "string",
+                    "column_name": "created",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
@@ -522,16 +528,14 @@
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.0.created",
-                    "data_type": "string",
-                    "column_name": "created",
-                    "column_order": 3
-                },
-                {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
                     "column_name": "source_name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -544,10 +548,6 @@
                 {
                     "data_path": "summary.total_objects_successful",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -755,10 +755,6 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.sighting_description",
-                    "data_type": "string"
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -767,56 +763,7 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.0",
-                    "data_type": "string",
-                    "column_name": "Entity ID",
-                    "column_order": 0
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "",
-                        "Important data: Sighting was created in Threat Intelligence Platform"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.tags",
-                    "data_type": "string",
-                    "example_values": [
-                        "Phantom Sighting, Automatically created, Strange IP"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.confidence_value",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_2_maliciousness",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_2_value",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_3_value",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_3_maliciousness",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_2_type",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.sighting_maliciousness",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.observable_3_type",
                     "data_type": "string"
                 },
                 {
@@ -824,17 +771,49 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.parameter.sighting_type",
-                    "data_type": "string",
-                    "example_values": [
-                        "ipv4"
-                    ]
+                    "data_path": "action_result.parameter.observable_2_maliciousness",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_2_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_2_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_maliciousness",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_description",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_maliciousness",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.parameter.sighting_title",
                     "data_type": "string",
                     "example_values": [
                         "Sighting created by Phantom"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_type",
+                    "data_type": "string",
+                    "example_values": [
+                        "ipv4"
                     ]
                 },
                 {
@@ -845,11 +824,39 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.tags",
+                    "data_type": "string",
+                    "example_values": [
+                        "Phantom Sighting, Automatically created, Strange IP"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.0",
+                    "data_type": "string",
+                    "column_name": "Entity ID",
+                    "column_order": 0
+                },
+                {
                     "data_path": "action_result.summary.important_data",
                     "data_type": "string",
                     "example_values": [
                         "Sighting was created in Threat Intelligence Platform"
                     ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Important data: Sighting was created in Threat Intelligence Platform"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -888,13 +895,37 @@
                 "entity_type": {
                     "description": "Type of entity to query",
                     "data_type": "string",
-                    "value_list": ["all", "campaign", "course-of-action", "exploit-target", "incident", "indicator",
-                        "threat-actor", "ttp"],
+                    "value_list": [
+                        "all",
+                        "campaign",
+                        "course-of-action",
+                        "exploit-target",
+                        "incident",
+                        "indicator",
+                        "threat-actor",
+                        "ttp"
+                    ],
                     "default": "all",
                     "order": 2
                 }
             },
             "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.entity_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.entity_value",
+                    "data_type": "string"
+                },
                 {
                     "data_path": "action_result.parameter.query",
                     "data_type": "string",
@@ -910,31 +941,50 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.entity_value",
+                    "data_path": "action_result.data.*.description",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.parameter.entity_type",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.summary",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.message",
+                    "data_path": "action_result.data.*.extract_classification",
                     "data_type": "string",
-                    "example_values": [
-                        "Entitie found in Threat Intelligence Platform."
-                    ]
+                    "column_name": "extract_classification",
+                    "column_order": 7
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.*.extract_confidence",
                     "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
+                    "column_name": "extract_confidence",
+                    "column_order": 8
+                },
+                {
+                    "data_path": "action_result.data.*.extract_kind",
+                    "data_type": "string",
+                    "column_name": "extract_kind",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.*.extract_value",
+                    "data_type": "string",
+                    "column_name": "extract_value",
+                    "column_order": 6
+                },
+                {
+                    "data_path": "action_result.data.*.source_name",
+                    "data_type": "string",
+                    "column_name": "source_name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.tags",
+                    "data_type": "string",
+                    "column_name": "tags",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.threat_start",
+                    "data_type": "string",
+                    "column_name": "threat_start",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.*.title",
@@ -949,50 +999,15 @@
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.data.*.description",
+                    "data_path": "action_result.summary",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.*.source_name",
+                    "data_path": "action_result.message",
                     "data_type": "string",
-                    "column_name": "source_name",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.threat_start",
-                    "data_type": "string",
-                    "column_name": "threat_start",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.data.*.tags",
-                    "data_type": "string",
-                    "column_name": "tags",
-                    "column_order": 4
-                },                
-                {
-                    "data_path": "action_result.data.*.extract_kind",
-                    "data_type": "string",
-                    "column_name": "extract_kind",
-                    "column_order": 5
-                },
-                {
-                    "data_path": "action_result.data.*.extract_value",
-                    "data_type": "string",
-                    "column_name": "extract_value",
-                    "column_order": 6
-                },
-                {
-                    "data_path": "action_result.data.*.extract_classification",
-                    "data_type": "string",
-                    "column_name": "extract_classification",
-                    "column_order": 7
-                },
-                {
-                    "data_path": "action_result.data.*.extract_confidence",
-                    "data_type": "string",
-                    "column_name": "extract_confidence",
-                    "column_order": 8
+                    "example_values": [
+                        "Entitie found in Threat Intelligence Platform."
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
