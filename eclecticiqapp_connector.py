@@ -292,7 +292,7 @@ class EclecticIQ_api(object):
                 feed_result['packaging_status'] = r.json()['data']['packaging_status']
                 feed_result['name'] = r.json()['data']['name']
                 result.append(feed_result)
-                eiq_logging.debug('Feed #{} information retrieved succefully. Received response:' + json.dumps(feed_result) + ''.format(k))
+                eiq_logging.debug('Feed #{0} information retrieved succefully. Received response: {1}'.format(k, json.dumps(feed_result)))
 
         return result
 

@@ -1,7 +1,7 @@
 {
     "appid": "66ed0a79-f85d-4463-8fa2-45f4180a2d51",
     "name": "EclecticIQ app",
-    "description": "This app integrates a variety of reputation and investigative actions from the EclecticIQ Platform integration",
+    "description": "This app supports a variety of reputation and investigate actions for the EclecticIQ Platform integration",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
     "logo": "logo_eclecticiqapp.svg",
@@ -49,7 +49,6 @@
         "tip_ssl_check": {
             "description": "EclecticIQ SSL cert check",
             "data_type": "boolean",
-            "default": false,
             "required": true,
             "order": 5
         },
@@ -80,7 +79,7 @@
         {
             "action": "test connectivity",
             "identifier": "test_connectivity",
-            "description": "Validate the asset configuration for connectivity using supplied configuration",
+            "description": "Validate the asset configuration for connectivity using the supplied configuration",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -132,31 +131,31 @@
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -224,31 +223,31 @@
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -322,31 +321,31 @@
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -404,7 +403,7 @@
                     "contains": [
                         "ip"
                     ],
-                    "column_name": "ip",
+                    "column_name": "IP",
                     "column_order": 0
                 },
                 {
@@ -414,31 +413,31 @@
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -506,31 +505,31 @@
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -559,7 +558,7 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
-            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter or the asset configuration.",
+            "verbose": "The TIP group name must be provided (either in the source parameter or the asset configuration) for this action to run successfully.",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -947,55 +946,55 @@
                 {
                     "data_path": "action_result.data.*.extract_classification",
                     "data_type": "string",
-                    "column_name": "extract_classification",
+                    "column_name": "Extract Classification",
                     "column_order": 7
                 },
                 {
                     "data_path": "action_result.data.*.extract_confidence",
                     "data_type": "string",
-                    "column_name": "extract_confidence",
+                    "column_name": "Extract Confidence",
                     "column_order": 8
                 },
                 {
                     "data_path": "action_result.data.*.extract_kind",
                     "data_type": "string",
-                    "column_name": "extract_kind",
+                    "column_name": "Extract Kind",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.*.extract_value",
                     "data_type": "string",
-                    "column_name": "extract_value",
+                    "column_name": "Extract Value",
                     "column_order": 6
                 },
                 {
                     "data_path": "action_result.data.*.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
                     "data_path": "action_result.data.*.tags",
                     "data_type": "string",
-                    "column_name": "tags",
+                    "column_name": "Tags",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.*.threat_start",
                     "data_type": "string",
-                    "column_name": "threat_start",
+                    "column_name": "Threat Start",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.*.title",
                     "data_type": "string",
-                    "column_name": "entity_title",
+                    "column_name": "Entity Title",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.type",
                     "data_type": "string",
-                    "column_name": "entity_type",
+                    "column_name": "Entity Type",
                     "column_order": 1
                 },
                 {
@@ -1006,7 +1005,7 @@
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Entitie found in Threat Intelligence Platform."
+                        "Entity found in Threat Intelligence Platform."
                     ]
                 },
                 {
