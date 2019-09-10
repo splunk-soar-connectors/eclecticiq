@@ -1,7 +1,7 @@
 {
     "appid": "66ed0a79-f85d-4463-8fa2-45f4180a2d51",
     "name": "EclecticIQ app",
-    "description": "TIP integration",
+    "description": "This app supports a variety of reputation and investigative actions for the EclecticIQ Platform",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
     "logo": "logo_eclecticiqapp.svg",
@@ -10,50 +10,76 @@
     "product_version_regex": ".*",
     "publisher": "EclecticIQ",
     "license": "Copyright (c) EclecticIQ, 2019",
-    "app_version": "1.1.1",
-    "utctime_updated": "2018-08-15T17:36:45.850532Z",
+    "app_version": "1.2.0",
+    "utctime_updated": "2019-08-01T17:36:45.850532Z",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.pyc",
-    "min_phantom_version": "4.0.1068",
+    "min_phantom_version": "4.2.7532",
     "configuration": {
         "tip_uri": {
-            "description": "EclecticIQ TIP url",
+            "description": "EclecticIQ Platform address",
             "data_type": "string",
             "required": true,
-            "default": "https://tip_url.local",
             "order": 0
         },
         "tip_user": {
-            "description": "EclecticIQ TIP Username",
+            "description": "EclecticIQ Username",
             "data_type": "string",
             "required": true,
             "order": 1
         },
         "tip_password": {
-            "description": "EclecticIQ TIP Password",
+            "description": "EclecticIQ Password",
             "data_type": "password",
             "required": true,
             "order": 2
         },
         "tip_group": {
-            "description": "EclecticIQ TIP Group Name for Sightings",
+            "description": "EclecticIQ Group Name for Sightings",
             "data_type": "string",
             "required": false,
             "order": 3
         },
         "tip_of_id": {
-            "description": "EclecticIQ TIP Outgoing Feed ID # for polling",
+            "description": "EclecticIQ Outgoing Feed ID # for polling",
             "data_type": "numeric",
             "required": false,
             "order": 4
+        },
+        "tip_ssl_check": {
+            "description": "EclecticIQ SSL cert check",
+            "data_type": "boolean",
+            "required": true,
+            "order": 5
+        },
+        "tip_proxy_uri": {
+            "description": "Proxy server address",
+            "data_type": "string",
+            "required": false,
+            "order": 6
+        },
+        "ph": {
+            "data_type": "ph",
+            "order": 7
+        },
+        "tip_proxy_user": {
+            "description": "Proxy server username",
+            "data_type": "string",
+            "required": false,
+            "order": 8
+        },
+        "tip_proxy_password": {
+            "description": "Proxy server password",
+            "data_type": "password",
+            "required": false,
+            "order": 9
         }
     },
     "actions": [
         {
             "action": "test connectivity",
             "identifier": "test_connectivity",
-            "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "verbose": "",
+            "description": "Validate the asset configuration for connectivity using the supplied configuration",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -64,7 +90,6 @@
             "action": "domain reputation",
             "identifier": "domain_reputation",
             "description": "Queries domain info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -82,6 +107,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.domain",
                     "data_type": "string",
                     "contains": [
@@ -92,11 +125,42 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.0",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "example_values": [
-                        "success"
-                    ]
+                    "column_name": "Created",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.0.last_updated",
+                    "data_type": "string",
+                    "column_name": "Last Updated",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.0.maliciousness",
+                    "data_type": "string",
+                    "column_name": "Maliciousness",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.0.platform_link",
+                    "data_type": "string",
+                    "column_name": "Platform Link",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.0.source_name",
+                    "data_type": "string",
+                    "column_name": "Source Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -104,53 +168,11 @@
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
+                    "data_type": "numeric"
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.last_upd",
-                    "data_type": "string",
-                    "column_name": "Last Update",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.maliciosness",
-                    "data_type": "string",
-                    "example_values": [
-                        "unknown"
-                    ],
-                    "column_name": "Maliciousness",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.TIP_uri",
-                    "data_type": "string",
-                    "contains": [
-                        "domain",
-                        "url"
-                    ],
-                    "column_name": "TIP URL",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -162,7 +184,6 @@
             "action": "email reputation",
             "identifier": "email_reputation",
             "description": "Queries email info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -179,6 +200,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.email",
                     "data_type": "string",
                     "contains": [
@@ -188,11 +217,42 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.0",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "example_values": [
-                        "success"
-                    ]
+                    "column_name": "Created",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.0.last_updated",
+                    "data_type": "string",
+                    "column_name": "Last Updated",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.0.maliciousness",
+                    "data_type": "string",
+                    "column_name": "Maliciousness",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.0.platform_link",
+                    "data_type": "string",
+                    "column_name": "Platform Link",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.0.source_name",
+                    "data_type": "string",
+                    "column_name": "Source Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -200,52 +260,11 @@
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
+                    "data_type": "numeric"
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.last_upd",
-                    "data_type": "string",
-                    "column_name": "Last Update",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.maliciosness",
-                    "data_type": "string",
-                    "example_values": [
-                        "unknown"
-                    ],
-                    "column_name": "Maliciousness",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.TIP_uri",
-                    "data_type": "string",
-                    "contains": [
-                        "email"
-                    ],
-                    "column_name": "TIP URL",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -256,8 +275,7 @@
         {
             "action": "file reputation",
             "identifier": "file_reputation",
-            "description": "Queries for file reputation info",
-            "verbose": "",
+            "description": "Queries for file info",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -277,6 +295,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "contains": [
@@ -289,11 +315,42 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.0",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "example_values": [
-                        "success"
-                    ]
+                    "column_name": "Created",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.0.last_updated",
+                    "data_type": "string",
+                    "column_name": "Last Updated",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.0.maliciousness",
+                    "data_type": "string",
+                    "column_name": "Maliciousness",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.0.platform_link",
+                    "data_type": "string",
+                    "column_name": "Platform Link",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.0.source_name",
+                    "data_type": "string",
+                    "column_name": "Source Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -301,55 +358,11 @@
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
+                    "data_type": "numeric"
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.last_upd",
-                    "data_type": "string",
-                    "column_name": "Last Update",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.maliciosness",
-                    "data_type": "string",
-                    "example_values": [
-                        "unknown"
-                    ],
-                    "column_name": "Maliciousness",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.TIP_uri",
-                    "data_type": "string",
-                    "contains": [
-                        "hash",
-                        "sha256",
-                        "sha1",
-                        "md5"
-                    ],
-                    "column_name": "TIP URL",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -361,7 +374,6 @@
             "action": "ip reputation",
             "identifier": "ip_reputation",
             "description": "Queries IP info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -378,82 +390,71 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.ip",
                     "data_type": "string",
                     "contains": [
                         "ip"
                     ],
                     "column_name": "IP",
-                    "column_order": 0,
-                    "example_values": [
-                        "195.88.144.81"
-                    ]
+                    "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.0",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "example_values": [
-                        "success"
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Tip uri: https://10.0.4.46/observables/ipv4/195.88.144.81\nImportant data: IP found in Threat Intelligence Platform"
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.last_upd",
-                    "data_type": "string",
-                    "column_name": "Last Update",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.maliciosness",
-                    "data_type": "string",
-                    "example_values": [
-                        "unknown"
-                    ],
-                    "column_name": "Maliciousness",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.TIP_uri",
-                    "data_type": "string",
-                    "contains": [
-                        "ip"
-                    ],
-                    "column_name": "TIP URL",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
-                    "data_path": "action_result.summary.important_data",
+                    "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "example_values": [
-                        "IP found in Threat Intelligence Platform"
-                    ]
+                    "column_name": "Last Updated",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.0.maliciousness",
+                    "data_type": "string",
+                    "column_name": "Maliciousness",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.0.platform_link",
+                    "data_type": "string",
+                    "column_name": "Platform Link",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.0.source_name",
+                    "data_type": "string",
+                    "column_name": "Source Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -465,7 +466,6 @@
             "action": "url reputation",
             "identifier": "url_reputation",
             "description": "Queries URL info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -482,6 +482,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.url",
                     "data_type": "string",
                     "contains": [
@@ -491,11 +499,42 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data.0",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "example_values": [
-                        "success"
-                    ]
+                    "column_name": "Created",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.0.last_updated",
+                    "data_type": "string",
+                    "column_name": "Last Updated",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.0.maliciousness",
+                    "data_type": "string",
+                    "column_name": "Maliciousness",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.0.platform_link",
+                    "data_type": "string",
+                    "column_name": "Platform Link",
+                    "column_order": 5
+                },
+                {
+                    "data_path": "action_result.data.0.source_name",
+                    "data_type": "string",
+                    "column_name": "Source Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -503,52 +542,11 @@
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
+                    "data_type": "numeric"
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.last_upd",
-                    "data_type": "string",
-                    "column_name": "Last Update",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.maliciosness",
-                    "data_type": "string",
-                    "example_values": [
-                        "unknown"
-                    ],
-                    "column_name": "Maliciousness",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.TIP_uri",
-                    "data_type": "string",
-                    "contains": [
-                        "url"
-                    ],
-                    "column_name": "TIP URL",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.summary.important_data",
-                    "data_type": "string"
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -560,7 +558,7 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
-            "verbose": "It is mandatory to provide the TIP group name in the asset configuration for this action to run successfully",
+            "verbose": "The TIP group name must be provided (either in the source parameter or the asset configuration) for this action to run successfully.",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -568,32 +566,53 @@
                     "description": "Observable value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "order": 1
                 },
                 "sighting_type": {
                     "description": "Observable type",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
-                        "ipv4",
-                        "hash-md5",
-                        "hash-sha256",
-                        "hash-sha512",
-                        "hash-sha1",
                         "domain",
                         "email",
-                        "uri"
+                        "email-subject",
+                        "file",
+                        "hash",
+                        "hash-md5",
+                        "hash-sha1",
+                        "hash-sha256",
+                        "hash-sha512",
+                        "host",
+                        "ipv4",
+                        "ipv6",
+                        "mutex",
+                        "port",
+                        "process",
+                        "sha512",
+                        "uri",
+                        "uri-hash-sha256",
+                        "winregistry"
                     ],
-                    "default": "",
                     "order": 0
+                },
+                "sighting_maliciousness": {
+                    "description": "Observalble maliciousness",
+                    "data_type": "string",
+                    "required": false,
+                    "value_list": [
+                        "Malicious (High confidence)",
+                        "Malicious (Medium confidence)",
+                        "Malicious (Low confidence)",
+                        "Safe",
+                        "Unknown"
+                    ],
+                    "default": "Unknown",
+                    "order": 2
                 },
                 "confidence_value": {
                     "description": "Confidence value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -602,451 +621,219 @@
                         "High"
                     ],
                     "default": "None",
-                    "order": 4
+                    "order": 5
                 },
                 "sighting_description": {
                     "description": "Sighting description",
                     "data_type": "string",
                     "required": false,
-                    "primary": false,
-                    "order": 2
+                    "order": 3
                 },
                 "sighting_title": {
                     "description": "Sighting title",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Sighting created by Phantom",
-                    "order": 3
+                    "order": 4
                 },
                 "tags": {
-                    "description": "Sighting tags delimted by ','",
+                    "description": "Sighting tags delimited by ','",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Phantom Sighting, Automatically created",
-                    "order": 5
+                    "order": 6
+                },
+                "impact_value": {
+                    "description": "Impact value",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "None",
+                        "Unknown",
+                        "Low",
+                        "Medium",
+                        "High"
+                    ],
+                    "default": "None",
+                    "order": 7
+                },
+                "observable_2_maliciousness": {
+                    "description": "Observable 2 maliciousness",
+                    "data_type": "string",
+                    "required": false,
+                    "value_list": [
+                        "Malicious (High confidence)",
+                        "Malicious (Medium confidence)",
+                        "Malicious (Low confidence)",
+                        "Safe",
+                        "Unknown"
+                    ],
+                    "default": "Unknown",
+                    "order": 8
+                },
+                "observable_2_type": {
+                    "description": "Observable 2 type",
+                    "data_type": "string",
+                    "required": false,
+                    "value_list": [
+                        "domain",
+                        "email",
+                        "email-subject",
+                        "file",
+                        "hash",
+                        "hash-md5",
+                        "hash-sha1",
+                        "hash-sha256",
+                        "hash-sha512",
+                        "host",
+                        "ipv4",
+                        "ipv6",
+                        "mutex",
+                        "port",
+                        "process",
+                        "sha512",
+                        "uri",
+                        "uri-hash-sha256",
+                        "winregistry"
+                    ],
+                    "order": 9
+                },
+                "observable_2_value": {
+                    "description": "Observable 2 value",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 10
+                },
+                "observable_3_maliciousness": {
+                    "description": "Observable 3 maliciousness",
+                    "data_type": "string",
+                    "required": false,
+                    "value_list": [
+                        "Malicious (High confidence)",
+                        "Malicious (Medium confidence)",
+                        "Malicious (Low confidence)",
+                        "Safe",
+                        "Unknown"
+                    ],
+                    "default": "Unknown",
+                    "order": 11
+                },
+                "observable_3_type": {
+                    "description": "Observable 3 type",
+                    "data_type": "string",
+                    "required": false,
+                    "value_list": [
+                        "domain",
+                        "email",
+                        "email-subject",
+                        "file",
+                        "hash",
+                        "hash-md5",
+                        "hash-sha1",
+                        "hash-sha256",
+                        "hash-sha512",
+                        "host",
+                        "ipv4",
+                        "ipv6",
+                        "mutex",
+                        "port",
+                        "process",
+                        "sha512",
+                        "uri",
+                        "uri-hash-sha256",
+                        "winregistry"
+                    ],
+                    "order": 12
+                },
+                "observable_3_value": {
+                    "description": "Observable 3 value",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 13
                 }
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.sighting_description",
-                    "data_type": "string",
-                    "column_name": "Sighting Description",
-                    "column_order": 1
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "",
-                        "Important data: Sighting was created in Threat Intelligence Platform"
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.tags",
-                    "data_type": "string",
-                    "column_name": "Tags",
-                    "column_order": 5,
-                    "example_values": [
-                        "Phantom Sighting, Automatically created, Strange IP"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
                     "data_path": "action_result.parameter.confidence_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.impact_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_2_maliciousness",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_2_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_2_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_maliciousness",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_3_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_description",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_maliciousness",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.sighting_title",
                     "data_type": "string",
-                    "column_name": "Confidence Value",
-                    "column_order": 4,
                     "example_values": [
-                        "None"
+                        "Sighting created by Phantom"
                     ]
                 },
                 {
                     "data_path": "action_result.parameter.sighting_type",
                     "data_type": "string",
-                    "column_name": "Sighting Type",
-                    "column_order": 2,
                     "example_values": [
                         "ipv4"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.sighting_title",
-                    "data_type": "string",
-                    "column_name": "Sighting Title",
-                    "column_order": 0,
-                    "example_values": [
-                        "Sighting created by Phantom"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.relevancy",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.affected",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.exposed",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.sighted",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.community_feed",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.prevent_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.detect_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.prevent_feed",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.prevent_ok",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.affected_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.detect_ok",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.exposure.detect_feed",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.last_updated_at",
-                    "data_type": "string",
-                    "example_values": [
-                        "2018-09-03T10:47:02.414109+00:00",
-                        "2018-09-03T11:06:53.177018+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.type",
-                    "data_type": "string",
-                    "example_values": [
-                        "entities"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.created_at",
-                    "data_type": "string",
-                    "example_values": [
-                        "2018-09-03T10:47:02.414109+00:00",
-                        "2018-09-03T11:06:53.177018+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.created_by",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.tlp_color_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.half_life_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.source_type",
-                    "data_type": "string",
-                    "example_values": [
-                        "group"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.source_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "651a5ef9-4483-43a2-8620-acbe16cfcf0e"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.source_reliability",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.source_reliability_override",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.sources.*.name",
-                    "data_type": "string",
-                    "example_values": [
-                        "Testing Group"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.half_life_original",
-                    "data_type": "numeric",
-                    "example_values": [
-                        182
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.tags",
-                    "data_type": "string",
-                    "example_values": [
-                        "Strange IP"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.title",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sighting created by Phantom"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.half_life",
-                    "data_type": "numeric",
-                    "example_values": [
-                        182
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.estimated_observed_time",
-                    "data_type": "string",
-                    "example_values": [
-                        "2018-09-03T10:47:02.430506+00:00",
-                        "2018-09-03T11:06:53.192134+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.stix_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "{http://eclecticiq.com}eclecticiq-sighting-434d1645-7789-4ec8-a4c8-d36b50d612c2",
-                        "{http://eclecticiq.com}eclecticiq-sighting-48586c54-fb0e-4e70-a85c-9b4bbafe3c6f"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.estimated_threat_start_time",
-                    "data_type": "string",
-                    "example_values": [
-                        "2018-09-03T10:47:02.430506+00:00",
-                        "2018-09-03T11:06:53.192134+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.ingest_time",
-                    "data_type": "string",
-                    "example_values": [
-                        "2018-09-03T10:47:02.430506+00:00",
-                        "2018-09-03T11:06:53.192134+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.tlp_color",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.external_ids",
-                    "data_type": "string",
-                    "example_values": [
-                        "{http://eclecticiq.com}eclecticiq-sighting-434d1645-7789-4ec8-a4c8-d36b50d612c2",
-                        "{http://eclecticiq.com}eclecticiq-sighting-48586c54-fb0e-4e70-a85c-9b4bbafe3c6f"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.meta.source_reliability",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.blob",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.id",
-                    "data_type": "string",
-                    "example_values": [
-                        "434d1645-7789-4ec8-a4c8-d36b50d612c2",
-                        "48586c54-fb0e-4e70-a85c-9b4bbafe3c6f"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.group_description",
-                    "data_type": "string",
-                    "example_values": []
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.confidence.type",
-                    "data_type": "string",
-                    "example_values": [
-                        "confidence"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.confidence.value",
-                    "data_type": "string",
-                    "example_values": [
-                        "None"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.description",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.description_structuring_format",
-                    "data_type": "string",
-                    "example_values": [
-                        "html"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.title",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sighting created by Phantom"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.related_extracts.*.kind",
-                    "data_type": "string",
-                    "example_values": [
-                        "ipv4"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.related_extracts.*.type",
-                    "data_type": "string",
-                    "example_values": [
-                        "eclecticiq-extract"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.related_extracts.*.value",
+                    "data_path": "action_result.parameter.sighting_value",
                     "data_type": "string",
                     "example_values": [
                         "222.222.222.222"
-                    ],
-                    "contains": [
-                        "ip"
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.data.security_control.type",
+                    "data_path": "action_result.parameter.tags",
                     "data_type": "string",
                     "example_values": [
-                        "information-source"
+                        "Phantom Sighting, Automatically created, Strange IP"
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.data.data.security_control.identity.type",
+                    "data_path": "action_result.data.0",
                     "data_type": "string",
-                    "example_values": [
-                        "identity"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.security_control.identity.name",
-                    "data_type": "string",
-                    "example_values": [
-                        "EclecticIQ App for Phantom"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.data.type",
-                    "data_type": "string",
-                    "example_values": [
-                        "eclecticiq-sighting"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.data.group_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "760b01e0-4736-4b63-a007-d79b0ec844ba",
-                        "7adb5f81-432f-448b-9174-92dc2d3d508a"
-                    ]
+                    "column_name": "Entity ID",
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.summary.important_data",
@@ -1056,13 +843,19 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.sighting_value",
+                    "data_path": "action_result.message",
                     "data_type": "string",
-                    "column_name": "Sighting Value",
-                    "column_order": 3,
                     "example_values": [
-                        "222.222.222.222"
+                        "Important data: Sighting was created in Threat Intelligence Platform"
                     ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -1073,14 +866,13 @@
         {
             "action": "query entities",
             "identifier": "query_entities",
-            "description": "Query EclecticIQ TIP for entities",
+            "description": "Query EclecticIQ Platform for entities",
             "type": "investigate",
-            "read_only": false,
+            "read_only": true,
             "parameters": {
                 "query": {
-                    "description": "description of query",
+                    "description": "Observable value to query related entities",
                     "data_type": "string",
-                    "required": true,
                     "primary": true,
                     "contains": [
                         "ip",
@@ -1093,9 +885,46 @@
                         "sha512"
                     ],
                     "order": 0
+                },
+                "entity_value": {
+                    "description": "Text to search inside entity title. To find exact phrase wrap it with double-quotes (\")",
+                    "data_type": "string",
+                    "order": 1
+                },
+                "entity_type": {
+                    "description": "Type of entity to query",
+                    "data_type": "string",
+                    "value_list": [
+                        "all",
+                        "campaign",
+                        "course-of-action",
+                        "exploit-target",
+                        "incident",
+                        "indicator",
+                        "threat-actor",
+                        "ttp"
+                    ],
+                    "default": "all",
+                    "order": 2
                 }
             },
             "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.entity_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.entity_value",
+                    "data_type": "string"
+                },
                 {
                     "data_path": "action_result.parameter.query",
                     "data_type": "string",
@@ -1108,175 +937,84 @@
                         "sha256",
                         "md5",
                         "sha512"
-                    ],
-                    "column_name": "query",
-                    "column_order": 0,
-                    "example_values": [
-                        "87.237.198.245"
                     ]
-                },
-                {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1,
-                    "example_values": [
-                        "success"
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Important data: value"
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.title",
-                    "data_type": "string",
-                    "column_name": "title",
-                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.description",
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.*.threat_start",
-                    "data_type": "string",
-                    "column_name": "threat_start",
-                    "column_order": 1
-                },
-                {
-                    "data_path": "action_result.data.*.tags",
-                    "data_type": "string",
-                    "column_name": "tags",
-                    "column_order": 2
-                },                
-                {
-                    "data_path": "action_result.data.*.extract_kind",
-                    "data_type": "string",
-                    "column_name": "extract_kind",
-                    "column_order": 3
-                },
-                {
-                    "data_path": "action_result.data.*.extract_value",
-                    "data_type": "string",
-                    "column_name": "extract_value",
-                    "column_order": 4
-                },
-                {
                     "data_path": "action_result.data.*.extract_classification",
                     "data_type": "string",
-                    "column_name": "extract_classification",
-                    "column_order": 5
+                    "column_name": "Extract Classification",
+                    "column_order": 7
                 },
                 {
                     "data_path": "action_result.data.*.extract_confidence",
                     "data_type": "string",
-                    "column_name": "extract_confidence",
-                    "column_order": 6
+                    "column_name": "Extract Confidence",
+                    "column_order": 8
                 },
                 {
-                    "data_path": "action_result.data.*.hits.hits.*._type",
+                    "data_path": "action_result.data.*.extract_kind",
                     "data_type": "string",
-                    "example_values": [
-                        "indicator"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.hits.hits.*._source.sources.*.name",
-                    "data_type": "string",
-                    "example_values": [
-                        "hail taxii"
-                    ],
-                    "column_name": "source",
-                    "column_order": 2
-                },
-                {
-                    "data_path": "action_result.data.*.hits.hits.*._source.meta.title",
-                    "data_type": "string",
-                    "example_values": [
-                        "C2C Site: 87.237.198.245/img/cp.php?m=login"
-                    ],
-                    "column_name": "meta title",
-                    "column_order": 4
-                },
-                {
-                    "data_path": "action_result.data.*.hits.hits.*._source.meta.estimated_threat_start_time",
-                    "data_type": "string",
-                    "example_values": [
-                        "2014-12-13T00:00:00+00:00"
-                    ],
-                    "column_name": "threat start time",
+                    "column_name": "Extract Kind",
                     "column_order": 5
                 },
                 {
-                    "data_path": "action_result.data.*.hits.hits.*._source.meta.estimated_observed_time",
+                    "data_path": "action_result.data.*.extract_value",
                     "data_type": "string",
-                    "example_values": [
-                        "2014-12-13T00:00:00+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.hits.hits.*._source.data.observable.type",
-                    "data_type": "string",
-                    "example_values": [
-                        "observable"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*.hits.hits.*._source.data.description",
-                    "data_type": "string",
-                    "example_values": [
-                        "This IP address 80.237.198.245 has been identified as a command and control site for Test malware by test-tracker.net. For more detailed infomation about this indicator go to [CAUTION!!Read-URL-Before-Click] [http://test-tracker.net/index.php]"
-                    ],
-                    "column_name": "description",
+                    "column_name": "Extract Value",
                     "column_order": 6
                 },
                 {
-                    "data_path": "action_result.data.*.hits.hits.*._source.data.title",
+                    "data_path": "action_result.data.*.source_name",
                     "data_type": "string",
-                    "example_values": [
-                        "C2C Site: 87.237.198.245/img/cp.php?m=login"
-                    ]
+                    "column_name": "Source Name",
+                    "column_order": 2
                 },
                 {
-                    "data_path": "action_result.data.*.hits.hits.*._source.data.timestamp",
+                    "data_path": "action_result.data.*.tags",
                     "data_type": "string",
-                    "example_values": [
-                        "2014-12-13T16:05:09.935040+00:00"
-                    ]
+                    "column_name": "Tags",
+                    "column_order": 4
                 },
                 {
-                    "data_path": "action_result.data.*.hits.hits.*._source.data.type",
+                    "data_path": "action_result.data.*.threat_start",
                     "data_type": "string",
-                    "example_values": [
-                        "indicator"
-                    ],
-                    "column_name": "type",
+                    "column_name": "Threat Start",
                     "column_order": 3
                 },
                 {
-                    "data_path": "action_result.summary.important_data",
+                    "data_path": "action_result.data.*.title",
+                    "data_type": "string",
+                    "column_name": "Entity Title",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.type",
+                    "data_type": "string",
+                    "column_name": "Entity Type",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "value"
+                        "Entity found in Threat Intelligence Platform."
                     ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
                 }
             ],
             "render": {
@@ -1288,47 +1026,40 @@
             "action": "on poll",
             "identifier": "on_poll",
             "description": "Callback action for the on_poll ingest functionality",
-            "verbose": "",
             "type": "ingest",
             "read_only": true,
             "parameters": {
                 "container_id": {
                     "description": "Container IDs to limit the ingestion to",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false
+                    "required": false
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
                 },
                 "end_time": {
                     "description": "End of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 2
                 },
                 "container_count": {
                     "description": "Maximum number of container records to query for",
                     "data_type": "numeric",
-                    "required": false,
-                    "primary": false
+                    "required": false
                 },
                 "artifact_count": {
                     "description": "Maximum number of artifact records to query for",
                     "data_type": "numeric",
-                    "required": false,
-                    "primary": false
+                    "required": false
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
                     "data_type": "string",
                     "required": false,
-                    "primary": false,
                     "order": 5
                 }
             },
