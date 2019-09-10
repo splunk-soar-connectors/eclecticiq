@@ -567,7 +567,7 @@ class EclecticIQ_api(object):
         """Method search specific entity by specific search conditions.
 
         Note: search works with wildcards for entity value and with strict conditions for everything else.
-            Also, it's recommended to use this method to lookup entity name based on the entity ID, because it doesnt
+            Also, it's recommended to use this method to lookup the entity name based on the entity ID, because it doesn't
             return all the relationships.
 
             if you need to find specific entity - search by entity id
@@ -580,7 +580,7 @@ class EclecticIQ_api(object):
             observable_value: observable value to search inside entity
 
         Returns:
-            Return dictionary with all the entity details.
+            Return a dictionary with all the entity details.
             Otherwise returns False.
 
         """
