@@ -1,7 +1,7 @@
 {
     "appid": "66ed0a79-f85d-4463-8fa2-45f4180a2d51",
     "name": "EclecticIQ app",
-    "description": "This app supports a variety of reputation and investigate actions for the EclecticIQ Platform integration",
+    "description": "This app supports a variety of reputation and investigative actions for the EclecticIQ Platform",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
     "logo": "logo_eclecticiqapp.svg",
