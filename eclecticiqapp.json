@@ -4,8 +4,8 @@
     "description": "EclecticIQ Platform integration",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
-    "logo": "eclecticiqapp.svg",
-    "logo_dark": "eclecticiqapp_dark.svg",
+    "logo": "logo_eclecticiqapp.svg",
+    "logo_dark": "logo_eclecticiqapp_dark.svg",
     "product_name": "TIP",
     "product_version_regex": ".*",
     "publisher": "EclecticIQ",
@@ -37,13 +37,11 @@
         "tip_group": {
             "description": "EclecticIQ Group Name for Entities",
             "data_type": "string",
-            "required": false,
             "order": 3
         },
         "tip_of_id": {
             "description": "EclecticIQ Outgoing Feed ID # for polling",
             "data_type": "numeric",
-            "required": false,
             "order": 4
         },
         "tip_ssl_check": {
@@ -56,23 +54,20 @@
         "tip_proxy_uri": {
             "description": "Proxy server address",
             "data_type": "string",
-            "required": false,
             "order": 6
         },
         "ph": {
-        "data_type": "ph",
-        "order": 7
+            "data_type": "ph",
+            "order": 7
         },
         "tip_proxy_user": {
             "description": "Proxy server username",
             "data_type": "string",
-            "required": false,
             "order": 8
         },
         "tip_proxy_password": {
             "description": "Proxy server password",
             "data_type": "password",
-            "required": false,
             "order": 9
         }
     },
@@ -81,7 +76,6 @@
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "verbose": "",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -92,7 +86,6 @@
             "action": "domain reputation",
             "identifier": "domain_reputation",
             "description": "Queries domain info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -116,12 +109,16 @@
                         "domain",
                         "url"
                     ],
-                    "column_name": "domain",
+                    "column_name": "Domain",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.0",
@@ -130,31 +127,31 @@
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -183,7 +180,6 @@
             "action": "email reputation",
             "identifier": "email_reputation",
             "description": "Queries email info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -205,12 +201,16 @@
                     "contains": [
                         "email"
                     ],
-                    "column_name": "email",
+                    "column_name": "Email",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.0",
@@ -219,31 +219,31 @@
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -272,7 +272,6 @@
             "action": "file reputation",
             "identifier": "file_reputation",
             "description": "Queries for file reputation info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -300,12 +299,16 @@
                         "sha1",
                         "md5"
                     ],
-                    "column_name": "hash",
+                    "column_name": "Hash",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.0",
@@ -314,31 +317,31 @@
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -367,7 +370,6 @@
             "action": "ip reputation",
             "identifier": "ip_reputation",
             "description": "Queries IP info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -389,12 +391,16 @@
                     "contains": [
                         "ip"
                     ],
-                    "column_name": "ip",
+                    "column_name": "IP",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.0",
@@ -403,31 +409,31 @@
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -456,7 +462,6 @@
             "action": "url reputation",
             "identifier": "url_reputation",
             "description": "Queries URL info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -478,12 +483,16 @@
                     "contains": [
                         "url"
                     ],
-                    "column_name": "url",
+                    "column_name": "URL",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.0",
@@ -492,31 +501,31 @@
                 {
                     "data_path": "action_result.data.0.last_updated",
                     "data_type": "string",
-                    "column_name": "last_updated",
+                    "column_name": "Last Updated",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.0.maliciousness",
                     "data_type": "string",
-                    "column_name": "maliciousness",
+                    "column_name": "Maliciousness",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.0.platform_link",
                     "data_type": "string",
-                    "column_name": "platform_link",
+                    "column_name": "Platform Link",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.0.created",
                     "data_type": "string",
-                    "column_name": "created",
+                    "column_name": "Created",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.0.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
@@ -553,14 +562,12 @@
                     "description": "Observable value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "order": 1
                 },
                 "sighting_type": {
                     "description": "Observable type",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "domain",
                         "email",
@@ -582,14 +589,11 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 0
                 },
                 "sighting_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -604,7 +608,6 @@
                     "description": "Confidence value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -618,15 +621,12 @@
                 "sighting_description": {
                     "description": "Sighting description",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "order": 3
                 },
                 "sighting_title": {
                     "description": "Sighting title",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Sighting created by Phantom",
                     "order": 4
                 },
@@ -634,7 +634,6 @@
                     "description": "Sighting tags delimited by ','",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Phantom Sighting, Automatically created",
                     "order": 6
                 },
@@ -642,7 +641,6 @@
                     "description": "Impact value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -656,8 +654,6 @@
                 "observable_2_maliciousness": {
                     "description": "Observable 2 maliciousness",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -671,8 +667,6 @@
                 "observable_2_type": {
                     "description": "Observable 2 type",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "value_list": [
                         "domain",
                         "email",
@@ -694,21 +688,16 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 9
                 },
                 "observable_2_value": {
                     "description": "Observable 2 value",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "order": 10
                 },
                 "observable_3_maliciousness": {
                     "description": "Observable 3 maliciousness",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -722,8 +711,6 @@
                 "observable_3_type": {
                     "description": "Observable 3 type",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "value_list": [
                         "domain",
                         "email",
@@ -745,14 +732,11 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 12
                 },
                 "observable_3_value": {
                     "description": "Observable 3 value",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "order": 13
                 }
             },
@@ -765,7 +749,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -871,15 +856,12 @@
                     "description": "Observable dictionary",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
-                    "default": "",
                     "order": 6
                 },
                 "indicator_type": {
                     "description": "Indicator type",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "Malicious E-mail",
                         "IP Watchlist",
@@ -896,14 +878,12 @@
                         "IMEI Watchlist",
                         "IMSI Watchlist"
                     ],
-                    "default": "",
                     "order": 1
                 },
                 "confidence_value": {
                     "description": "Confidence value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -917,15 +897,12 @@
                 "indicator_description": {
                     "description": "Indicator description",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "order": 5
                 },
                 "indicator_title": {
                     "description": "Indicator title",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Indicator created by Phantom",
                     "order": 0
                 },
@@ -933,7 +910,6 @@
                     "description": "Indicator tags delimited by ','",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "default": "Phantom Indicator, Automatically created",
                     "order": 4
                 },
@@ -941,7 +917,6 @@
                     "description": "Impact value",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -962,7 +937,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -999,16 +975,15 @@
             },
             "versions": "EQ(*)"
         },
-
         {
             "action": "query entities",
             "identifier": "query_entities",
             "description": "Query EclecticIQ Platform for entities",
             "type": "investigate",
-            "read_only": false,
+            "read_only": true,
             "parameters": {
                 "query": {
-                    "description": "Observable value to query related entities.",
+                    "description": "Observable value to query related entities",
                     "data_type": "string",
                     "primary": true,
                     "contains": [
@@ -1024,15 +999,23 @@
                     "order": 0
                 },
                 "entity_value": {
-                    "description": "Text to search inside entity title. To find exact phrase wrap it with double-quotes (\").",
+                    "description": "Text to search inside entity title. To find exact phrase wrap it with double-quotes (\")",
                     "data_type": "string",
                     "order": 1
                 },
                 "entity_type": {
                     "description": "Type of entity to query",
                     "data_type": "string",
-                    "value_list": ["all", "campaign", "course-of-action", "exploit-target", "incident", "indicator",
-                        "threat-actor", "ttp"],
+                    "value_list": [
+                        "all",
+                        "campaign",
+                        "course-of-action",
+                        "exploit-target",
+                        "incident",
+                        "indicator",
+                        "threat-actor",
+                        "ttp"
+                    ],
                     "default": "all",
                     "order": 2
                 }
@@ -1073,18 +1056,22 @@
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.title",
                     "data_type": "string",
-                    "column_name": "entity_title",
+                    "column_name": "Entity Title",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.type",
                     "data_type": "string",
-                    "column_name": "entity_type",
+                    "column_name": "Entity Type",
                     "column_order": 1
                 },
                 {
@@ -1094,43 +1081,43 @@
                 {
                     "data_path": "action_result.data.*.source_name",
                     "data_type": "string",
-                    "column_name": "source_name",
+                    "column_name": "Source Name",
                     "column_order": 2
                 },
                 {
                     "data_path": "action_result.data.*.threat_start",
                     "data_type": "string",
-                    "column_name": "threat_start",
+                    "column_name": "Threat Start",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.*.tags",
                     "data_type": "string",
-                    "column_name": "tags",
+                    "column_name": "Tags",
                     "column_order": 4
-                },                
+                },
                 {
                     "data_path": "action_result.data.*.extract_kind",
                     "data_type": "string",
-                    "column_name": "extract_kind",
+                    "column_name": "Extract Kind",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.data.*.extract_value",
                     "data_type": "string",
-                    "column_name": "extract_value",
+                    "column_name": "Extract Value",
                     "column_order": 6
                 },
                 {
                     "data_path": "action_result.data.*.extract_classification",
                     "data_type": "string",
-                    "column_name": "extract_classification",
+                    "column_name": "Extract Classification",
                     "column_order": 7
                 },
                 {
                     "data_path": "action_result.data.*.extract_confidence",
                     "data_type": "string",
-                    "column_name": "extract_confidence",
+                    "column_name": "Extract Confidence",
                     "column_order": 8
                 },
                 {
@@ -1151,47 +1138,34 @@
             "action": "on poll",
             "identifier": "on_poll",
             "description": "Callback action for the on_poll ingest functionality",
-            "verbose": "",
             "type": "ingest",
             "read_only": true,
             "parameters": {
                 "container_id": {
                     "description": "Container IDs to limit the ingestion to",
-                    "data_type": "string",
-                    "required": false,
-                    "primary": false
+                    "data_type": "string"
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
                     "order": 1
                 },
                 "end_time": {
                     "description": "End of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
                     "order": 2
                 },
                 "container_count": {
                     "description": "Maximum number of container records to query for",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false
+                    "data_type": "numeric"
                 },
                 "artifact_count": {
                     "description": "Maximum number of artifact records to query for",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false
+                    "data_type": "numeric"
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
                     "order": 5
                 }
             },

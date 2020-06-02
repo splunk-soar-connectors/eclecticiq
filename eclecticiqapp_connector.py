@@ -11,6 +11,7 @@ import re
 import logging
 import datetime
 import time
+from bs4 import UnicodeDammit
 
 API_PATHS = {
     '2.1': {
@@ -1589,15 +1590,18 @@ class EclecticiqAppConnector(BaseConnector):
         self._state = self.load_state()
         # get the asset config
         config = self.get_config()
-
-        self.eiq_api = EclecticIQ_api(baseurl=config['tip_uri'],
-                                      eiq_version='2.4',
-                                      username=config['tip_user'],
-                                      password=config['tip_password'],
-                                      verify_ssl=config.get('tip_ssl_check', False),
-                                      proxy_ip=config.get('tip_proxy_uri', None),
-                                      proxy_password=config.get('tip_proxy_password', None),
-                                      proxy_username=config.get('tip_proxy_user', None))
+        try:
+            self.eiq_api = EclecticIQ_api(baseurl=config['tip_uri'],
+                                          eiq_version='2.4',
+                                          username=UnicodeDammit(config['tip_user']).unicode_markup.encode('utf-8'),
+                                          password=config['tip_password'],
+                                          verify_ssl=config.get('tip_ssl_check', False),
+                                          proxy_ip=config.get('tip_proxy_uri', None),
+                                          proxy_password=config.get('tip_proxy_password', None),
+                                          proxy_username=config.get('tip_proxy_user', None))
+        except Exception as e:
+            self.save_progress(e.message)
+            return phantom.APP_ERROR
 
         self._tip_group = config.get('tip_group', None)
         self._tip_of_id = config.get('tip_of_id', None)
