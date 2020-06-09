@@ -658,7 +658,7 @@ class EclecticIQ_api(object):
             query_list.append("data.title:" + entity_value)
 
         if observable_value is not None:
-            query_list.append("extracts.value:\"" + observable_value + "\"")
+            query_list.append(UnicodeDammit("extracts.value:\"" + observable_value + "\"").unicode_markup.encode('utf-8'))
 
         if entity_type is not None:
             query_list.append("data.type:" + entity_type)
@@ -1147,9 +1147,12 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_domain_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        domain = param['domain']
+        domain = UnicodeDammit(param['domain']).unicode_markup.encode('utf-8')
 
-        lookup_result = self.eiq_api.lookup_observable(domain, 'domain')
+        try:
+            lookup_result = self.eiq_api.lookup_observable(domain, 'domain')
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1177,9 +1180,12 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_email_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        email = param['email']
+        email = UnicodeDammit(param['email']).unicode_markup.encode('utf-8')
 
-        lookup_result = self.eiq_api.lookup_observable(email, 'email')
+        try:
+            lookup_result = self.eiq_api.lookup_observable(email, 'email')
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1209,7 +1215,10 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
         file_hash = param['hash']
 
-        lookup_result = self.eiq_api.lookup_observable(file_hash, 'file,hash-md5,hash-sha1,hash-sha256,hash-sha512')
+        try:
+            lookup_result = self.eiq_api.lookup_observable(file_hash, 'file,hash-md5,hash-sha1,hash-sha256,hash-sha512')
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1239,7 +1248,10 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
         ip = param['ip']
 
-        lookup_result = self.eiq_api.lookup_observable(ip, 'ipv4')
+        try:
+            lookup_result = self.eiq_api.lookup_observable(ip, 'ipv4')
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1267,9 +1279,12 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_url_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        url = param['url']
+        url = UnicodeDammit(param['url']).unicode_markup.encode('utf-8')
 
-        lookup_result = self.eiq_api.lookup_observable(url, 'uri')
+        try:
+            lookup_result = self.eiq_api.lookup_observable(url, 'uri')
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1304,15 +1319,17 @@ class EclecticiqAppConnector(BaseConnector):
         observables_dict = self._prepare_observables(param)
 
         sighting_conf_value = param['confidence_value']
-        sighting_title = param['sighting_title']
+        sighting_title = UnicodeDammit(param['sighting_title']).unicode_markup.encode('utf-8')
         sighting_tags = param['tags'].split(",")
         sighting_impact_value = param.get('impact_value')
         sighting_description = param.get('sighting_description', "")
-
-        sighting = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
-                                              entity_title=sighting_title, entity_description=sighting_description,
-                                              entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
-                                              entity_impact_value=sighting_impact_value)
+        try:
+            sighting = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
+                                                  entity_title=sighting_title, entity_description=sighting_description,
+                                                  entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
+                                                  entity_impact_value=sighting_impact_value)
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         action_result.add_data(sighting)
         summary = action_result.update_summary({})
@@ -1325,13 +1342,16 @@ class EclecticiqAppConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_create_indicator(self, param):
+
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         if self._tip_group == "None":
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
-
-        observables_dict = self._prepare_entity_observables(param['observable_dictionary'])
+        try:
+            observables_dict = self._prepare_entity_observables(param['observable_dictionary'])
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Provide valid observable dictionary"), None)
 
         indicator_conf_value = param['confidence_value']
         indicator_title = param['indicator_title']
@@ -1340,11 +1360,14 @@ class EclecticiqAppConnector(BaseConnector):
         indicator_description = param.get('indicator_description', "")
         indicator_type = param['indicator_type']
 
-        indicator = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
-                                              entity_title=indicator_title, entity_description=indicator_description,
-                                              entity_tags=indicator_tags, entity_confidence=indicator_conf_value,
-                                              entity_impact_value=indicator_impact_value, indicator_type=indicator_type,
-                                              entity_type="indicator")
+        try:
+            indicator = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
+                                                  entity_title=indicator_title, entity_description=indicator_description,
+                                                  entity_tags=indicator_tags, entity_confidence=indicator_conf_value,
+                                                  entity_impact_value=indicator_impact_value, indicator_type=indicator_type,
+                                                  entity_type="indicator")
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         action_result.add_data(indicator)
         summary = action_result.update_summary({})
@@ -1469,14 +1492,23 @@ class EclecticiqAppConnector(BaseConnector):
 
         query = param.get('query', None)
 
+        if query:
+            query = UnicodeDammit(query).unicode_markup.encode('utf-8')
+
         if param['entity_type'] == "all":
             entity_type = '("campaign" OR "course-of-action" OR "exploit-target" OR "incident" OR' \
                           ' "indicator" OR "threat-actor" OR "ttp")'
         else:
             entity_type = param['entity_type']
-        entity_value = param.get('entity_value', None)
 
-        query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
+        entity_value = param.get('entity_value', None)
+        if entity_value:
+            entity_value = UnicodeDammit(entity_value).unicode_markup.encode('utf-8')
+
+        try:
+            query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
+        except Exception as e:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, e.message), None)
 
         if query_result is not False:
             for k in query_result:

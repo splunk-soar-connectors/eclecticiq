@@ -554,7 +554,7 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
-            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter, or the asset configuration.",
+            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter or the asset configuration.",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -594,6 +594,7 @@
                 "sighting_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
+                    "required": true,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -963,6 +964,26 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.impact_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.indicator_title",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.indicator_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.confidence_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_dictionary",
+                    "data_type": "string"
+                },
+                {
                     "data_path": "action_result.summary.important_data",
                     "data_type": "string",
                     "example_values": [
@@ -1143,7 +1164,8 @@
             "parameters": {
                 "container_id": {
                     "description": "Container IDs to limit the ingestion to",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "order": 0
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
@@ -1157,11 +1179,13 @@
                 },
                 "container_count": {
                     "description": "Maximum number of container records to query for",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 3
                 },
                 "artifact_count": {
                     "description": "Maximum number of artifact records to query for",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 4
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
