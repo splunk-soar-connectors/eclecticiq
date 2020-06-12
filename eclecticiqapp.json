@@ -593,7 +593,6 @@
                 "sighting_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -855,8 +854,8 @@
         {
             "action": "create indicator",
             "identifier": "create_indicator",
-            "description": "Create indicator in EclecticIQ TIP",
-            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter, or the asset configuration.",
+            "description": "Create an indicator in EclecticIQ TIP",
+            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter or the asset configuration.",
             "type": "contain",
             "read_only": false,
             "parameters": {

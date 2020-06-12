@@ -115,16 +115,15 @@ class EclecticIQ_api(object):
 
     def set_eiq_proxy(self):
         # TD sanitize proxy?
-
         if self.proxy_ip and self.proxy_username and self.proxy_password:
             return {
-                'http': 'http://' + self.proxy_username + ':' + self.proxy_password + '@' + self.proxy_ip + '/',
-                'https': 'http://' + self.proxy_username + ':' + self.proxy_password + '@' + self.proxy_ip + '/',
+                'http': 'http://{0}{1}{2}{3}{4}{5}'.format(self.proxy_username, ':', self.proxy_password, '@', self.proxy_ip, '/'),
+                'https': 'http://{0}{1}{2}{3}{4}{5}'.format(self.proxy_username, ':', self.proxy_password, '@', self.proxy_ip, '/'),
             }
         elif self.proxy_ip:
             return {
-                'http': 'http://' + self.proxy_ip + '/',
-                'https': 'http://' + self.proxy_ip + '/',
+                'http': 'http://{0}{1}'.format(self.proxy_ip, '/'),
+                'https': 'http://{0}{1}'.format(self.proxy_ip, '/'),
             }
         else:
             return None
@@ -668,7 +667,7 @@ class EclecticIQ_api(object):
         search_dict = {
             "query": {
                 "query_string": {
-                    "query": str(" AND ".join(query_list))
+                    "query": " AND ".join(query_list)
                 }
             }
         }
@@ -876,10 +875,10 @@ class EclecticiqAppConnector(BaseConnector):
         error_msg = "Unknown error occurred. Please check the asset configuration and|or the action parameters."
 
         try:
-            if e.message:
+            if hasattr(e, 'message') and e.message:
                 error_code = "Error code unavailable"
-                error_msg = e.message
-            elif e.args:
+                error_msg = self._unicode_string_handler(e.message)
+            elif hasattr(e, 'args') and e.args:
                 if len(e.args) > 1:
                     error_code = e.args[0]
                     error_msg = e.args[1]
@@ -920,21 +919,30 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        if self._tip_of_id == "None":
+        if self._tip_of_id is None:
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Outgoing Feed ID in asset parameters"), None)
 
         artifact_count = param.get("artifact_count", 0)
         container_count = param.get("container_count", 0)
-        feed_info = self.eiq_api.get_feed_info(self._tip_of_id)
+
+        try:
+            feed_info = self.eiq_api.get_feed_info(self._tip_of_id)
+            if not feed_info:
+                return action_result.set_status(phantom.APP_ERROR, "Unable to fetch the feed information from the provided Outgoing Feed ID")
+        except Exception as e:
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            return action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if feed_info[0]['update_strategy'] not in ['REPLACE', 'APPEND']:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Outgoing feed update strategy not supported."), None)
+            return action_result.set_status(phantom.APP_ERROR, "Outgoing feed update strategy not supported.")
         elif feed_info[0]['packaging_status'] != 'SUCCESS':
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Outgoing feed is running now. Wait for run"
-                                                                      " complete first."), None)
+            return action_result.set_status(phantom.APP_ERROR, "Outgoing feed is running now. Wait for run"
+                                                                      " complete first.")
 
         if feed_info[0]['update_strategy'] == 'REPLACE':
+
             feed_content_block_list = self.eiq_api.get_feed_content_blocks(feed=feed_info[0])
+
             containers_processed = 0
             artifacts_processed = 0
 
@@ -996,6 +1004,7 @@ class EclecticiqAppConnector(BaseConnector):
             feed_last_run['created_at'] = self._state.get('created_at', None)
 
             feed_content_block_list = self.eiq_api.get_feed_content_blocks(feed=feed_info[0], feed_last_run=feed_last_run)
+
             containers_processed = 0
             artifacts_processed = 0
 
@@ -1015,7 +1024,6 @@ class EclecticiqAppConnector(BaseConnector):
 
                     self.send_progress("Reached artifacts polling limit: {0}".format(artifacts_processed))
                     return self.set_status(phantom.APP_SUCCESS)
-
                 self.send_progress("Processing block # {0}".format(idx))
                 downloaded_block = json.loads(self.eiq_api.download_block_list(record))
                 events = downloaded_block.get('entities', [])
@@ -1023,7 +1031,6 @@ class EclecticiqAppConnector(BaseConnector):
 
                 for i in events:
                     idref = i['meta'].get('is_unresolved_idref', False)
-
                     if i['data']['type'] != "relation" and idref is not True:
                         container = {}
                         container['data'] = i
@@ -1037,7 +1044,6 @@ class EclecticiqAppConnector(BaseConnector):
 
                         if i['meta'].get('tlp_color', "") in ["RED", "AMBER", "GREEN", "WHITE"]:
                             container['sensitivity'] = i['meta'].get('tlp_color', "").lower()
-
                         try:
                             severity = i['data']['impact']['value']
                             if severity in ["High", "Medium", "Low"]:
@@ -1056,7 +1062,6 @@ class EclecticiqAppConnector(BaseConnector):
 
                 containers_processed, artifacts_processed = \
                     self._save_results(results, containers_processed, artifacts_processed, artifact_count, container_count)
-
                 self._state['last_ingested'] = str(record)
                 self._state['created_at'] = feed_info[0]['created_at']
                 self.save_state(self._state)
@@ -1157,7 +1162,12 @@ class EclecticiqAppConnector(BaseConnector):
         if self._tip_of_id is not None:
             self.save_progress("-----------------------------------------")
             self.save_progress("Testing Outgoing Feed availability")
-            outgoing_feed = self.eiq_api.get_feed_info(self._tip_of_id)
+            try:
+                outgoing_feed = self.eiq_api.get_feed_info(self._tip_of_id)
+            except Exception as e:
+                error_code, error_msg = self._get_error_message_from_exception(e)
+                return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching Feed information for the provided Outgoing Feed ID. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
             if not outgoing_feed[0]:
                 self.save_progress("Outgoing Feed check Failed.")
@@ -1193,13 +1203,14 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_domain_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        domain = UnicodeDammit(param['domain']).unicode_markup.encode('utf-8')
+        domain = self._unicode_string_handler(param['domain'])
 
         try:
             lookup_result = self.eiq_api.lookup_observable(domain, 'domain')
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the details for the provided Domain. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1227,13 +1238,14 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_email_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        email = UnicodeDammit(param['email']).unicode_markup.encode('utf-8')
+        email = self._unicode_string_handler(param['email'])
 
         try:
             lookup_result = self.eiq_api.lookup_observable(email, 'email')
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the details for the provided email. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1267,7 +1279,8 @@ class EclecticiqAppConnector(BaseConnector):
             lookup_result = self.eiq_api.lookup_observable(file_hash, 'file,hash-md5,hash-sha1,hash-sha256,hash-sha512')
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the details for the provided file. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1301,7 +1314,8 @@ class EclecticiqAppConnector(BaseConnector):
             lookup_result = self.eiq_api.lookup_observable(ip, 'ipv4')
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the details for the provided IP. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1329,13 +1343,14 @@ class EclecticiqAppConnector(BaseConnector):
     def _handle_url_reputation(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
-        url = UnicodeDammit(param['url']).unicode_markup.encode('utf-8')
+        url = self._unicode_string_handler(param['url'])
 
         try:
             lookup_result = self.eiq_api.lookup_observable(url, 'uri')
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the details for the provided URL. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if lookup_result is None:
             summary = action_result.update_summary({})
@@ -1364,13 +1379,17 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        if self._tip_group == "None":
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
-
-        observables_dict = self._prepare_observables(param)
+        if self._tip_group is None:
+            return action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters")
+        try:
+            observables_dict = self._prepare_observables(param)
+        except Exception as e:
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Please provide valid action parameters. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         sighting_conf_value = param['confidence_value']
-        sighting_title = UnicodeDammit(param['sighting_title']).unicode_markup.encode('utf-8')
+        sighting_title = self._unicode_string_handler(param['sighting_title'])
         sighting_tags = param['tags'].split(",")
         sighting_impact_value = param.get('impact_value')
         sighting_description = param.get('sighting_description', "")
@@ -1381,7 +1400,8 @@ class EclecticiqAppConnector(BaseConnector):
                                                   entity_impact_value=sighting_impact_value)
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while creating Sighting. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         action_result.add_data(sighting)
         summary = action_result.update_summary({})
@@ -1398,12 +1418,14 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        if self._tip_group == "None":
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
+        if self._tip_group is None:
+            return action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters")
         try:
             observables_dict = self._prepare_entity_observables(param['observable_dictionary'])
         except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Provide valid observable dictionary"), None)
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Please provide a valid observable dictionary. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         indicator_conf_value = param['confidence_value']
         indicator_title = param['indicator_title']
@@ -1420,7 +1442,8 @@ class EclecticiqAppConnector(BaseConnector):
                                                   entity_type="indicator")
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while creating Indicator. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         action_result.add_data(indicator)
         summary = action_result.update_summary({})
@@ -1435,7 +1458,7 @@ class EclecticiqAppConnector(BaseConnector):
     def _prepare_observables(self, param):
         observable_params = [
             (
-                param['sighting_maliciousness'],
+                param.get('sighting_maliciousness'),
                 param['sighting_type'],
                 param['sighting_value'],
             ),
@@ -1475,10 +1498,10 @@ class EclecticiqAppConnector(BaseConnector):
         for observable in observable_params:
             record = dict(
                 observable_type=observable[1],
-                observable_value=observable[2])
+                observable_value=observable[0])
 
-            record["observable_maliciousness"] = maliciousness_to_meta[observable[0]].get("confidence", "")
-            record["observable_classification"] = maliciousness_to_meta[observable[0]].get("classification", "")
+            record["observable_maliciousness"] = maliciousness_to_meta[observable[2]].get("confidence", "")
+            record["observable_classification"] = maliciousness_to_meta[observable[2]].get("classification", "")
 
             observables_list.append(record)
 
@@ -1529,13 +1552,12 @@ class EclecticiqAppConnector(BaseConnector):
         for observable in observable_input:
             record = dict(
                 observable_type=observable[1],
-                observable_value=observable[0])
+                observable_value=observable[2])
 
-            record["observable_maliciousness"] = maliciousness_to_meta[observable[2]].get("confidence", "")
-            record["observable_classification"] = maliciousness_to_meta[observable[2]].get("classification", "")
+            record["observable_maliciousness"] = maliciousness_to_meta[observable[0]].get("confidence", "")
+            record["observable_classification"] = maliciousness_to_meta[observable[0]].get("classification", "")
 
             observables_list.append(record)
-
         return observables_list
 
     def _handle_query_entities(self, param):
@@ -1543,26 +1565,22 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        query = param.get('query', None)
+        query = self._unicode_string_handler(param.get('query', None))
 
-        if query:
-            query = UnicodeDammit(query).unicode_markup.encode('utf-8')
-
-        if param['entity_type'] == "all":
+        if param.get('entity_type') == "all":
             entity_type = '("campaign" OR "course-of-action" OR "exploit-target" OR "incident" OR' \
                           ' "indicator" OR "threat-actor" OR "ttp")'
         else:
-            entity_type = param['entity_type']
+            entity_type = param.get('entity_type')
 
-        entity_value = param.get('entity_value', None)
-        if entity_value:
-            entity_value = UnicodeDammit(entity_value).unicode_markup.encode('utf-8')
+        entity_value = self._unicode_string_handler(param.get('entity_value', None))
 
         try:
             query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg), None))
+            return action_result.set_status(phantom.APP_ERROR,
+                            "Error while fetching the Query Result. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
 
         if query_result is not False:
             for k in query_result:
@@ -1678,13 +1696,13 @@ class EclecticiqAppConnector(BaseConnector):
         config = self.get_config()
         try:
             self.eiq_api = EclecticIQ_api(baseurl=self._unicode_string_handler(config['tip_uri']),
-                                          eiq_version='2.4',
-                                          username=self._unicode_string_handler(config['tip_user']),
-                                          password=config['tip_password'],
-                                          verify_ssl=config.get('tip_ssl_check', False),
-                                          proxy_ip=config.get('tip_proxy_uri', None),
-                                          proxy_password=config.get('tip_proxy_password', None),
-                                          proxy_username=self._unicode_string_handler(config.get('tip_proxy_user', None)))
+                                            eiq_version='2.4',
+                                            username=self._unicode_string_handler(config['tip_user']),
+                                            password=config['tip_password'],
+                                            verify_ssl=config.get('tip_ssl_check', False),
+                                            proxy_ip=self._unicode_string_handler(config.get('tip_proxy_uri', None)),
+                                            proxy_password=config.get('tip_proxy_password', None),
+                                            proxy_username=self._unicode_string_handler(config.get('tip_proxy_user', None)))
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
             return self.set_status(phantom.APP_ERROR, "Error connecting to server. Error Code: {0}. Error Message: {1}".format(error_code, error_msg))
