@@ -45,7 +45,7 @@
             "order": 4
         },
         "tip_ssl_check": {
-            "description": "EclecticIQ SSL cert Check",
+            "description": "EclecticIQ SSL Cert Check",
             "data_type": "boolean",
             "default": false,
             "order": 5
