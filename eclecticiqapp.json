@@ -1,7 +1,7 @@
 {
     "appid": "66ed0a79-f85d-4463-8fa2-45f4180a2d51",
     "name": "EclecticIQ app",
-    "description": "This app supports a variety of reputation and investigative actions for the EclecticIQ Platform",
+    "description": "EclecticIQ Platform integration",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
     "logo": "logo_eclecticiqapp.svg",
@@ -9,15 +9,15 @@
     "product_name": "TIP",
     "product_version_regex": ".*",
     "publisher": "EclecticIQ",
-    "license": "Copyright (c) EclecticIQ, 2019",
-    "app_version": "1.2.0",
-    "utctime_updated": "2019-08-01T17:36:45.850532Z",
+    "license": "Copyright (c) EclecticIQ, 2020",
+    "app_version": "1.3.1",
+    "utctime_updated": "2020-03-20T17:36:45.850532Z",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.pyc",
-    "min_phantom_version": "4.2.7532",
+    "min_phantom_version": "4.6.19142",
     "configuration": {
         "tip_uri": {
-            "description": "EclecticIQ Platform address",
+            "description": "EclecticIQ Platform Address",
             "data_type": "string",
             "required": true,
             "order": 0
@@ -29,33 +29,30 @@
             "order": 1
         },
         "tip_password": {
-            "description": "EclecticIQ Password",
+            "description": "EclecticIQ Password/Token",
             "data_type": "password",
             "required": true,
             "order": 2
         },
         "tip_group": {
-            "description": "EclecticIQ Group Name for Sightings",
+            "description": "EclecticIQ Group Name for Entities",
             "data_type": "string",
-            "required": false,
             "order": 3
         },
         "tip_of_id": {
-            "description": "EclecticIQ Outgoing Feed ID # for polling",
+            "description": "EclecticIQ Outgoing Feed ID # for Polling",
             "data_type": "numeric",
-            "required": false,
             "order": 4
         },
         "tip_ssl_check": {
-            "description": "EclecticIQ SSL cert check",
+            "description": "EclecticIQ SSL Cert Check",
             "data_type": "boolean",
-            "required": true,
+            "default": false,
             "order": 5
         },
         "tip_proxy_uri": {
-            "description": "Proxy server address",
+            "description": "Proxy Server Address",
             "data_type": "string",
-            "required": false,
             "order": 6
         },
         "ph": {
@@ -63,15 +60,13 @@
             "order": 7
         },
         "tip_proxy_user": {
-            "description": "Proxy server username",
+            "description": "Proxy Server Username",
             "data_type": "string",
-            "required": false,
             "order": 8
         },
         "tip_proxy_password": {
-            "description": "Proxy server password",
+            "description": "Proxy Server Password",
             "data_type": "password",
-            "required": false,
             "order": 9
         }
     },
@@ -79,7 +74,7 @@
         {
             "action": "test connectivity",
             "identifier": "test_connectivity",
-            "description": "Validate the asset configuration for connectivity using the supplied configuration",
+            "description": "Validate the asset configuration for connectivity using supplied configuration",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -275,7 +270,7 @@
         {
             "action": "file reputation",
             "identifier": "file_reputation",
-            "description": "Queries for file info",
+            "description": "Queries for file reputation info",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -558,7 +553,7 @@
             "action": "create sighting",
             "identifier": "create_sighting",
             "description": "Create sighting in EclecticIQ TIP",
-            "verbose": "The TIP group name must be provided (either in the source parameter or the asset configuration) for this action to run successfully.",
+            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter or the asset configuration.",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -598,7 +593,6 @@
                 "sighting_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -626,7 +620,6 @@
                 "sighting_description": {
                     "description": "Sighting description",
                     "data_type": "string",
-                    "required": false,
                     "order": 3
                 },
                 "sighting_title": {
@@ -660,7 +653,6 @@
                 "observable_2_maliciousness": {
                     "description": "Observable 2 maliciousness",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -674,7 +666,6 @@
                 "observable_2_type": {
                     "description": "Observable 2 type",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "domain",
                         "email",
@@ -701,13 +692,11 @@
                 "observable_2_value": {
                     "description": "Observable 2 value",
                     "data_type": "string",
-                    "required": false,
                     "order": 10
                 },
                 "observable_3_maliciousness": {
                     "description": "Observable 3 maliciousness",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -721,7 +710,6 @@
                 "observable_3_type": {
                     "description": "Observable 3 type",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "domain",
                         "email",
@@ -748,7 +736,6 @@
                 "observable_3_value": {
                     "description": "Observable 3 value",
                     "data_type": "string",
-                    "required": false,
                     "order": 13
                 }
             },
@@ -846,7 +833,167 @@
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
+                        "",
                         "Important data: Sighting was created in Threat Intelligence Platform"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "create indicator",
+            "identifier": "create_indicator",
+            "description": "Create an indicator in EclecticIQ TIP",
+            "verbose": "The TIP group name must be provided for this action to run successfully. Either in the source parameter or the asset configuration.",
+            "type": "contain",
+            "read_only": false,
+            "parameters": {
+                "observable_dictionary": {
+                    "description": "Observable dictionary",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 6
+                },
+                "indicator_type": {
+                    "description": "Indicator type",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "Malicious E-mail",
+                        "IP Watchlist",
+                        "File Hash Watchlist",
+                        "URL Watchlist",
+                        "Domain Watchlist",
+                        "Malware Artifacts",
+                        "C2",
+                        "Anonymization",
+                        "Exfiltration",
+                        "Host Characteristics",
+                        "Compromised PKI Certificate",
+                        "Login Name",
+                        "IMEI Watchlist",
+                        "IMSI Watchlist"
+                    ],
+                    "order": 1
+                },
+                "confidence_value": {
+                    "description": "Confidence value",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "None",
+                        "Unknown",
+                        "Low",
+                        "Medium",
+                        "High"
+                    ],
+                    "default": "None",
+                    "order": 2
+                },
+                "indicator_description": {
+                    "description": "Indicator description",
+                    "data_type": "string",
+                    "order": 5
+                },
+                "indicator_title": {
+                    "description": "Indicator title",
+                    "data_type": "string",
+                    "required": true,
+                    "default": "Indicator created by Phantom",
+                    "order": 0
+                },
+                "tags": {
+                    "description": "Indicator tags delimited by ','",
+                    "data_type": "string",
+                    "required": true,
+                    "default": "Phantom Indicator, Automatically created",
+                    "order": 4
+                },
+                "impact_value": {
+                    "description": "Impact value",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "None",
+                        "Unknown",
+                        "Low",
+                        "Medium",
+                        "High"
+                    ],
+                    "default": "None",
+                    "order": 3
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.confidence_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.impact_value",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.indicator_description",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.indicator_title",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.indicator_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.observable_dictionary",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.tags",
+                    "data_type": "string",
+                    "example_values": [
+                        "Phantom Indicator, Automatically created, Strange IP"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.0",
+                    "data_type": "string",
+                    "column_name": "Entity ID",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.summary.important_data",
+                    "data_type": "string",
+                    "example_values": [
+                        "Indicator was created in Threat Intelligence Platform"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "",
+                        "Important data: Indicator was created in Threat Intelligence Platform"
                     ]
                 },
                 {
@@ -1005,7 +1152,7 @@
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Entity found in Threat Intelligence Platform."
+                        "Entitie found in Threat Intelligence Platform."
                     ]
                 },
                 {
@@ -1032,34 +1179,31 @@
                 "container_id": {
                     "description": "Container IDs to limit the ingestion to",
                     "data_type": "string",
-                    "required": false
+                    "order": 0
                 },
                 "start_time": {
                     "description": "Start of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 1
                 },
                 "end_time": {
                     "description": "End of time range, in epoch time (milliseconds)",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 2
                 },
                 "container_count": {
                     "description": "Maximum number of container records to query for",
                     "data_type": "numeric",
-                    "required": false
+                    "order": 3
                 },
                 "artifact_count": {
                     "description": "Maximum number of artifact records to query for",
                     "data_type": "numeric",
-                    "required": false
+                    "order": 4
                 },
                 "feed_ids": {
                     "description": "TIP feed IDs delimited by \",\"",
                     "data_type": "string",
-                    "required": false,
                     "order": 5
                 }
             },
