@@ -16,14 +16,11 @@ import requests
 import re
 import logging
 import datetime
-import time
 import urllib3
-import math
-import decimal
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-#from app.qpylib import qpylib
+# from app.qpylib import qpylib
 
 __version__ = '1.0.0'
 __license__ = 'Apache License 2.0'
@@ -71,7 +68,7 @@ API_PATHS = {
         'incoming_feeds': '/private/incoming-feeds/',
         'observables_batch_delete': '/private/extracts/batch-delete/',
         'status': '/private/status',
-        'user_status': '/private/users/me',        
+        'user_status': '/private/users/me',
         'enrichers': '/private/enricher-tasks/',
         'enrichers-run': '/private/enricher-tasks/batch-run'
     }
@@ -79,29 +76,33 @@ API_PATHS = {
 
 USER_AGENT = "script"
 
+
 def extract_uuid_from_url(url):
-    match = re.search('[\da-z\-]{36}', url)
+    match = re.search(r'[\da-z\-]{36}', url)
 
     if match:
         return match.group()
     else:
         return None
-    
+
+
 def observable_id_from_url(url):
-    match = re.search('(observables\/)([\d]+)', url)
+    match = re.search(r'(observables\/)([\d]+)', url)
 
     if match:
         return match.group(2)
     else:
         return None
+
 
 def taxonomie_id_from_url(url):
-    match = re.search('(taxonomies\/)([\d]+)', url)
+    match = re.search(r'(taxonomies\/)([\d]+)', url)
 
     if match:
         return match.group(2)
     else:
         return None
+
 
 def format_ts(dt):
     return dt.replace(microsecond=0).isoformat() + 'Z'
@@ -176,7 +177,7 @@ class EclecticIQ_api(object):
         else:
             return None
 
-    def get_outh_token(self, test_credentials = True):
+    def get_outh_token(self, test_credentials=True):
         self.eiq_logging.info('Authenticating using username: ' + str(self.eiq_username))
 
         try:
@@ -207,7 +208,7 @@ class EclecticIQ_api(object):
                         msg = ('EclecticIQ VA returned an error, code:[{0}], reason:[{1}], URL: [{2}]'
                             .format(r.status_code, r.reason, r.url))
                     raise Exception(msg)
-                
+
         except Exception:
             self.eiq_logging.error("Authentication failed")
             raise
@@ -266,14 +267,14 @@ class EclecticIQ_api(object):
         if r and r.status_code in [100, 200, 201, 202, 204]:
             return r
         else:
-            if r == None:
+            if r is None:
                 msg = ('Could not perform request to EclecticIQ VA: {0}: {1}. Check network connectivity.'.format(method, url))
                 self.eiq_logging.exception(msg)
                 raise Exception(msg)
             elif r.status_code in [401]:
                 msg = ('Wrong credentials. Status code:{0}'.format(r.status_code))
                 self.eiq_logging.exception(msg)
-                raise Exception(msg)            
+                raise Exception(msg)
             elif not r:
                 msg = ('Could not perform request to EclecticIQ VA: {0}: {1}. Status code:{2}'.format(method, url, r.status_code))
                 self.eiq_logging.exception(msg)
@@ -282,8 +283,7 @@ class EclecticIQ_api(object):
             try:
                 err = r.json()
                 detail = err['errors'][0]['detail']
-                msg = ('EclecticIQ VA returned an error, code:{0}, reason:[{1}], URL: [{2}], details:[{3}]'
-                    .format(
+                msg = ('EclecticIQ VA returned an error, code:{0}, reason:[{1}], URL: [{2}], details:[{3}]'.format(
                     r.status_code,
                     r.reason,
                     r.url,
@@ -296,7 +296,7 @@ class EclecticIQ_api(object):
             raise Exception(msg)
 
     def get_source_group_uid(self, group_name):
-        # get source group UID. 
+        # get source group UID.
         self.eiq_logging.debug("Requesting source id for specified group, name=[" + str(group_name) + "]")
         r = self.send_api_request(
             'get',
@@ -315,7 +315,7 @@ class EclecticIQ_api(object):
             return r.json()['data'][0]['source']
 
     def get_source_group_order_id(self, group_name):
-        # get source group UID. 
+        # get source group UID.
         self.eiq_logging.debug("Requesting source id for specified group, name=[" + str(group_name) + "]")
         r = self.send_api_request(
             'get',
@@ -405,17 +405,12 @@ class EclecticIQ_api(object):
         # TD "null" doesnt work, if lines are not commented it leads to 500 error
         create_feed_dict = {
             "data": {
-#                "archive_password": "null",
                 "content_type": content_type,
-#                "execution_schedule": "null",
                 "half_life": {},
                 "is_public": "false",
                 "name": feed_title,
-#                "organisation": "null",
                 "require_link_types": "false",
                 "require_valid_signature": "false",
-#                "source_reliability": "null",
-#                "tlp_color_override": "null",
                 "transport_configuration": {
                     "basic_authentication_mode": basic_auth,
                     "password": password,
@@ -455,7 +450,7 @@ class EclecticIQ_api(object):
                 #     "taxii_version": "1.1",
                 #     "verify_ssl": False
                 # },
-                #"task_name": "eiq.incoming-transports.taxii",
+                # "task_name": "eiq.incoming-transports.taxii",
                 "task_type": "provider_task",
                 "trigger": "null"
             }
@@ -473,7 +468,7 @@ class EclecticIQ_api(object):
         # To delete Outgoing feed
         self.eiq_logging.info("Delete Outgoing Feed {0}".format(feed_id))
 
-        r = self.send_api_request(
+        self.send_api_request(
             'delete',
             path=API_PATHS[self.eiq_api_version]['outgoing_feeds'] + str(feed_id))
 
@@ -484,7 +479,7 @@ class EclecticIQ_api(object):
         # To delete Incoming feed
         self.eiq_logging.info("Delete Incoming Feed {0}".format(feed_id))
 
-        r = self.send_api_request(
+        self.send_api_request(
             'delete',
             params="with_linked_data=true",
             path=API_PATHS[self.eiq_api_version]['incoming_feeds'] + str(feed_id))
@@ -496,7 +491,7 @@ class EclecticIQ_api(object):
         # To delete dataset
         self.eiq_logging.info("Delete Dataset {0}".format(data_set_id))
 
-        r = self.send_api_request(
+        self.send_api_request(
             'delete',
             path=API_PATHS[self.eiq_api_version]['dataset'] + str(data_set_id))
 
@@ -761,7 +756,7 @@ class EclecticIQ_api(object):
         self.enable_outgoing_feed(outgoing_feed_full_info)
 
         # couldn find way to detect that feed is fully created and enabled, without wait feed doesnt run oftenly
-        #time.sleep(0.5)
+        # time.sleep(0.5)
 
         run_task_outgoing_feed = {
             "data": {
@@ -803,7 +798,7 @@ class EclecticIQ_api(object):
         return result
 
     def get_incoming_feed_blobs_pending(self, feed_id):
-        # to get incmoing feed blobs 
+        # to get incmoing feed blobs
         self.eiq_logging.info("Requesting Incoming feed run status: {0}".format(feed_id))
 
         r = self.send_api_request(
@@ -823,7 +818,8 @@ class EclecticIQ_api(object):
 
         self.eiq_logging.info("Requesting full feed info for feed id={0}".format(feed_id))
 
-        if feed_id == "*": feed_id = ""
+        if feed_id == "*":
+            feed_id = ""
 
         r = self.send_api_request(
             'get',
@@ -838,7 +834,8 @@ class EclecticIQ_api(object):
 
         self.eiq_logging.info("Requesting full feed info for incoming feed id={0}".format(feed_id))
 
-        if feed_id == "*": feed_id = ""
+        if feed_id == "*":
+            feed_id = ""
 
         r = self.send_api_request(
             'get',
@@ -884,7 +881,7 @@ class EclecticIQ_api(object):
                 result.append(feed_result)
                 self.eiq_logging.debug(
                     'Feed id={0} information retrieved successfully. Received response:'.format(k) + str(
-                        json.dumps(feed_result)) + ''.format(k))
+                        json.dumps(feed_result)))
 
         return result
 
@@ -1003,7 +1000,7 @@ class EclecticIQ_api(object):
 
         params = {}
         params['filter[value]'] = value
-        
+
         if type is not None:
             params['filter[type]'] = type
 
@@ -1083,12 +1080,11 @@ class EclecticIQ_api(object):
     def delete_entity(self, entity_id):
         self.eiq_logging.info("Deleteing entity. id: {0}".format(entity_id))
 
-        r = self.send_api_request(
+        self.send_api_request(
             'delete',
             path=API_PATHS[self.eiq_api_version]['entities'] + str(entity_id))
 
         return "deleted"
-
 
     def get_taxonomy_dict(self):
         """Method returns dictionary with all the available taxonomy in Platform.
@@ -1102,7 +1098,7 @@ class EclecticIQ_api(object):
         r = self.send_api_request(
             'get',
             path=API_PATHS[self.eiq_api_version]['taxonomy_get'],
-            params={"limit":500})
+            params={"limit": 500})
 
         taxonomy = json.loads(r.text)
         taxonomy_dict = {}
@@ -1120,8 +1116,8 @@ class EclecticIQ_api(object):
             return taxonomy_dict
         else:
             return False
-        
-    def get_entity_realtionships(self, source_id = None, target_id = None):
+
+    def get_entity_realtionships(self, source_id=None, target_id=None):
         self.eiq_logging.info("Get realtionshsip for entity. Source id: {0}, Destination id: {1}".format(source_id, target_id))
         params = {}
 
@@ -1136,14 +1132,14 @@ class EclecticIQ_api(object):
             'get',
             path=API_PATHS[self.eiq_api_version]['relationships'],
             params=params)
-        
+
         parsed_response = json.loads(r.text)
         result = []
 
         if len(parsed_response['data']) > 0:
             for i in parsed_response['data']:
                 relation = {}
-                if direction == "source":                    
+                if direction == "source":
                     r = self.send_api_request(
                         'get',
                         path=API_PATHS[self.eiq_api_version]['entity_search'] + "/" + str(extract_uuid_from_url(i["data"]["target"])))
@@ -1151,24 +1147,23 @@ class EclecticIQ_api(object):
                     r = self.send_api_request(
                         'get',
                         path=API_PATHS[self.eiq_api_version]['entity_search'] + "/" + str(extract_uuid_from_url(i["data"]["source"])))
-                    
+
                 related_entity_parsed_response = json.loads(r.text)
-                    
+
                 if self.eiq_api_version == "v1":
                     relation["relation_title"] = i["meta"]["title"]
                     relation["entity_type"] = related_entity_parsed_response["data"]["type"]
                 elif self.eiq_api_version == "v2":
                     relation["relation_title"] = i["data"]["key"]
                     relation["entity_type"] = related_entity_parsed_response["data"]["data"]["type"]
-                                
-                relation["entity_title"] = related_entity_parsed_response["data"]["data"]["title"]                
+
+                relation["entity_title"] = related_entity_parsed_response["data"]["data"]["title"]
                 relation["entity_id"] = related_entity_parsed_response["data"]["id"]
                 relation["observables_count"] = len(related_entity_parsed_response["data"]["observables"])
                 result.append(relation)
         return result
 
-
-    def get_entity_by_id(self, entity_id, observables_lookup = True, relationships_lookup = True):
+    def get_entity_by_id(self, entity_id, observables_lookup=True, relationships_lookup=True):
         """Method lookups specific entity by Id.
 
         Args:
@@ -1203,7 +1198,7 @@ class EclecticIQ_api(object):
 
         """
         self.eiq_logging.info("Looking up Entity {0}.".format(entity_id))
-        
+
         try:
             r = self.send_api_request(
                 'get',
@@ -1227,7 +1222,7 @@ class EclecticIQ_api(object):
             if self.eiq_api_version == "v1":
                 result['entity_type'] = parsed_response['data'].get('type', 'N/A')
             elif self.eiq_api_version == "v2":
-                result['entity_type'] = parsed_response['data']['data'].get('type', 'N/A')            
+                result['entity_type'] = parsed_response['data']['data'].get('type', 'N/A')
 
             try:
                 for i in parsed_response['data']['meta']['tags']:
@@ -1246,9 +1241,9 @@ class EclecticIQ_api(object):
                 try:
                     for i in parsed_response['data']["observables"]:
                         observable_data = self.get_observable_by_id(observable_id_from_url(i))
-                        result['observables_list'].append({'value': observable_data['data']['value'], 
+                        result['observables_list'].append({'value': observable_data['data']['value'],
                                                         'type': observable_data['data']['type'],
-                                                        'maliciousness': observable_data['data']['meta']['maliciousness']})                
+                                                        'maliciousness': observable_data['data']['meta']['maliciousness']})
                 except (KeyError, TypeError):
                     pass
 
@@ -1258,22 +1253,22 @@ class EclecticIQ_api(object):
                 result['relationships_list'] = []
 
                 for i in entity_is_source_relationships:
-                    result['relationships_list'].append({"source_entity_title":result['entity_title'],
-                                                         "source_entity_type":result['entity_type'],
-                                                         "target_entity_title":i['entity_title'],
-                                                         "target_entity_type":i['entity_type'],
-                                                         "target_entity_id":i['entity_id'],
-                                                         "target_entity_observables_count":i['observables_count'],
-                                                         "relationship_title":i['relation_title']})
-                
+                    result['relationships_list'].append({"source_entity_title": result['entity_title'],
+                                                         "source_entity_type": result['entity_type'],
+                                                         "target_entity_title": i['entity_title'],
+                                                         "target_entity_type": i['entity_type'],
+                                                         "target_entity_id": i['entity_id'],
+                                                         "target_entity_observables_count": i['observables_count'],
+                                                         "relationship_title": i['relation_title']})
+
                 for i in entity_is_target_relationships:
-                    result['relationships_list'].append({"source_entity_title":i['entity_title'],
-                                                         "source_entity_type":i['entity_type'],
-                                                         "target_entity_title":result['entity_title'],
-                                                         "target_entity_type":result['entity_type'],
-                                                         "source_entity_id":i['entity_id'],
-                                                         "source_entity_observables_count":i['observables_count'],
-                                                         "relationship_title":i['relation_title']})                
+                    result['relationships_list'].append({"source_entity_title": i['entity_title'],
+                                                         "source_entity_type": i['entity_type'],
+                                                         "target_entity_title": result['entity_title'],
+                                                         "target_entity_type": result['entity_type'],
+                                                         "source_entity_id": i['entity_id'],
+                                                         "source_entity_observables_count": i['observables_count'],
+                                                         "relationship_title": i['relation_title']})
 
         except Exception as e:
             if "Status code: 404" in str(e):
@@ -1436,7 +1431,6 @@ class EclecticIQ_api(object):
 
             observable_dict_to_add.append(record)
 
-
         entity = {"data": {
             "data": {
                 "confidence": {
@@ -1473,7 +1467,6 @@ class EclecticIQ_api(object):
             }]
         }}
 
-
         r = self.send_api_request(
             'post',
             path=API_PATHS[self.eiq_api_version]['entities'],
@@ -1493,5 +1486,3 @@ class EclecticIQ_api(object):
             'get',
             path=path)
         return r.json()
-
-

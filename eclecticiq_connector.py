@@ -9,16 +9,13 @@ from phantom.action_result import ActionResult
 
 import requests
 import json
-import urllib
 import re
 
-import logging
-import datetime
-import time
-
-import math
-import decimal
 import eiq_api as eiqlib
+
+class RetVal(tuple):
+    def __new__(cls, val1, val2):
+        return tuple.__new__(RetVal, (val1, val2))
 
 
 class EclecticiqAppConnector(BaseConnector):
@@ -262,20 +259,20 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         self.save_progress("Testing EclecticIQ Intelligence Center availability.")
-        
+
         try:
-            status = self.eiq_api.get_user_status()            
+            self.eiq_api.get_user_status()
             self.save_progress("Test passed, authorization and connectivity successful.")
         except Exception as e:
             self.save_progress(str(e))
             self.save_progress("Connectivity and auth test failed.")
             return action_result.get_status()
-            
+
         if self._tip_of_id is not None:
             self.save_progress("-----------------------------------------")
             self.save_progress("Testing Outgoing Feed availability")
             outgoing_feed = self.eiq_api.get_feed_info(str(self._tip_of_id))
-            
+
             self.save_progress(str(outgoing_feed))
 
             if not outgoing_feed[0]:
@@ -373,11 +370,11 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
         file_hash = param['hash']
-        hash_types = ["file","hash-md5","hash-sha1","hash-sha256","hash-sha512"]
+        hash_types = ["file", "hash-md5", "hash-sha1", "hash-sha256", "hash-sha512"]
         result = {}
         summary = action_result.update_summary({})
         results_count = 0
-        
+
         for hash_type in hash_types:
             lookup_result = self.eiq_api.lookup_observable(file_hash, hash_type)
             if isinstance(lookup_result, dict):
@@ -397,7 +394,7 @@ class EclecticiqAppConnector(BaseConnector):
             action_result.add_data(result)
             summary['total_count'] = str(results_count)
             summary = action_result.update_summary({})
-            return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in EclecticIQ Platform.') 
+            return action_result.set_status(phantom.APP_SUCCESS, 'File hash found in EclecticIQ Platform.')
         else:
             summary = action_result.update_summary({})
             summary['total_count'] = '0'
@@ -499,13 +496,13 @@ class EclecticiqAppConnector(BaseConnector):
 
         if self._tip_group == "None":
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
-        
+
         try:
             param['observable_dictionary']
         except KeyError:
             param['observable_dictionary'] = []
 
-        observable_dict = self._prepare_entity_observables(param['observable_1_value'], 
+        observable_dict = self._prepare_entity_observables(param['observable_1_value'],
                                                             param['observable_1_type'],
                                                             param['observable_1_maliciousness'],
                                                             param['observable_dictionary'])
@@ -588,9 +585,6 @@ class EclecticiqAppConnector(BaseConnector):
         Been added for backward compatibility.
 
         """
-        
-        observables_list = []
-        
         maliciousness_to_meta = {
             "Malicious (High confidence)": {
                 "classification": "bad",
@@ -610,7 +604,7 @@ class EclecticiqAppConnector(BaseConnector):
             "Unknown": {
             }
         }
-        
+
         maliciousness_to_meta_dict = {
             "high": {
                 "classification": "bad",
@@ -630,19 +624,18 @@ class EclecticiqAppConnector(BaseConnector):
             "unknown": {
             }
         }
-        
+
         result = []
-        
         record = dict(
                 observable_type=observable1type,
                 observable_value=observable1value)
-        
+
         record["observable_maliciousness"] = maliciousness_to_meta[observable1malicousness].get("confidence", "")
         record["observable_classification"] = maliciousness_to_meta[observable1malicousness].get("classification", "")
-        
+
         result.append(record)
-        
-        if observable_dict:     
+
+        if observable_dict:
             split = (observable_dict.replace(" ", "")).split(";")
 
             for observable in split:
@@ -650,10 +643,10 @@ class EclecticiqAppConnector(BaseConnector):
                 record = dict(
                     observable_type=observable[1],
                     observable_value=observable[0])
-        
+
                 record["observable_maliciousness"] = maliciousness_to_meta_dict[observable[2]].get("confidence", "")
                 record["observable_classification"] = maliciousness_to_meta_dict[observable[2]].get("classification", "")
-            
+
                 result.append(record)
 
         return result
@@ -672,16 +665,16 @@ class EclecticiqAppConnector(BaseConnector):
         entity_value = param.get('entity_title', None)
         query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
 
-        if (type(query_result) is dict) or (type(query_result) is list): 
+        if (type(query_result) is dict) or (type(query_result) is list):
             output_result = []
-            
+
             for entity in query_result:
                 record = []
                 record = entity
                 record["observables_output"] = str(entity["observables_list"])
                 record["relationships_output"] = str(entity["relationships_list"])
                 output_result.append(record)
-                
+
             action_result.add_data(output_result)
 
             summary = action_result.update_summary({})
@@ -700,7 +693,7 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         entity_id = param.get('entity_id', None)
-        
+
         query_result = self.eiq_api.get_entity_by_id(entity_id)
 
         if type(query_result).__name__ == "Exception":
@@ -709,13 +702,13 @@ class EclecticiqAppConnector(BaseConnector):
                 summary['total_count'] = '0'
                 return action_result.set_status(phantom.APP_SUCCESS, 'No entities found in EclecticIQ Platform.')
             else:
-                return action_result.set_status(phantom.APP_ERROR)                
-        elif (type(query_result) is dict) or (type(query_result) is list):          
+                return action_result.set_status(phantom.APP_ERROR)
+        elif (type(query_result) is dict) or (type(query_result) is list):
             record = []
             record = query_result
             record["observables_output"] = str(query_result["observables_list"])
             record["relationships_output"] = str(query_result["relationships_list"])
-                
+
             action_result.add_data(record)
 
             summary = action_result.update_summary({})
@@ -730,34 +723,34 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         uri = param.get('uri', None)
-        
+
         summary = action_result.update_summary({})
 
         try:
             request_result = self.eiq_api.send_api_request('get', uri)
             record = {}
             record["reply_status"] = str(request_result.status_code)
-            record["reply_body"] = request_result.json()          
-            
+            record["reply_body"] = request_result.json()
+
             action_result.add_data(record)
             summary['total_count'] = 1
-            
+
             return action_result.set_status(phantom.APP_SUCCESS, 'EclecticIQ GET request been executed succefully.')
         except Exception as e:
-            status_code_re = re.search('\scode\:(\d*)', str(e))
+            status_code_re = re.search(r'\scode\:(\d*)', str(e))
             status_code = status_code_re.group(1)
-            
+
             record = {}
             record["reply_status"] = str(status_code)
             summary['total_count'] = 0
-            action_result.add_data(record)                        
+            action_result.add_data(record)
             return action_result.set_status(phantom.APP_ERROR)
 
     def _handle_eclecticiq_request_delete(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        uri = param.get('uri', None)        
+        uri = param.get('uri', None)
         summary = action_result.update_summary({})
 
         try:
@@ -767,48 +760,46 @@ class EclecticiqAppConnector(BaseConnector):
 
             action_result.add_data(record)
             summary['total_count'] = 1
-            
+
             return action_result.set_status(phantom.APP_SUCCESS, 'EclecticIQ DELETE request been executed succefully.')
         except Exception as e:
-            status_code_re = re.search('\scode\:(\d*)', str(e))
+            status_code_re = re.search(r'\scode\:(\d*)', str(e))
             status_code = status_code_re.group(1)
-            
+
             record = {}
             record["reply_status"] = str(status_code)
             summary['total_count'] = 0
-            action_result.add_data(record)                        
+            action_result.add_data(record)
             return action_result.set_status(phantom.APP_ERROR)
-        
+
     def _handle_eclecticiq_request_post(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         uri = param.get('uri', None)
         body = json.loads(param.get('body', None))
-        
+
         summary = action_result.update_summary({})
 
         try:
             request_result = self.eiq_api.send_api_request('post', uri, data=body)
             record = {}
             record["reply_status"] = str(request_result.status_code)
-            record["reply_body"] = request_result.json()          
-            
+            record["reply_body"] = request_result.json()
+
             action_result.add_data(record)
             summary['total_count'] = 1
-            
+
             return action_result.set_status(phantom.APP_SUCCESS, 'EclecticIQ POST request been executed succefully.')
         except Exception as e:
-            status_code_re = re.search('\scode\:(\d*)', str(e))
+            status_code_re = re.search(r'\scode\:(\d*)', str(e))
             status_code = status_code_re.group(1)
-            
             record = {}
             record["reply_status"] = str(status_code)
             summary['total_count'] = 0
-            action_result.add_data(record)                        
+            action_result.add_data(record)
             return action_result.set_status(phantom.APP_ERROR)
-        
-        
+
     def handle_action(self, param):
 
         ret_val = phantom.APP_SUCCESS
@@ -855,7 +846,7 @@ class EclecticiqAppConnector(BaseConnector):
             ret_val = self._handle_eclecticiq_request_post(param)
 
         elif action_id == 'eclecticiq_request_delete':
-            ret_val = self._handle_eclecticiq_request_delete(param)            
+            ret_val = self._handle_eclecticiq_request_delete(param)
 
         elif action_id == 'on_poll':
             ret_val = self._handle_on_poll(param)
@@ -914,7 +905,7 @@ if __name__ == '__main__':
 
     if (username and password):
         try:
-            print ("Accessing the Login page")
+            print("Accessing the Login page")
             r = requests.get("https://127.0.0.1/login", verify=False)
             csrftoken = r.cookies['csrftoken']
 
@@ -927,11 +918,11 @@ if __name__ == '__main__':
             headers['Cookie'] = 'csrftoken=' + csrftoken
             headers['Referer'] = 'https://127.0.0.1/login'
 
-            print ("Logging into Platform to get the session id")
+            print("Logging into Platform to get the session id")
             r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
-            print ("Unable to get session id from the platfrom. Error: " + str(e))
+            print("Unable to get session id from the platfrom. Error: " + str(e))
             exit(1)
 
     with open(args.input_test_json) as f:
@@ -947,6 +938,6 @@ if __name__ == '__main__':
             connector._set_csrf_info(csrftoken, headers['Referer'])
 
         ret_val = connector._handle_action(json.dumps(in_json), None)
-        print (json.dumps(json.loads(ret_val), indent=4))
+        print(json.dumps(json.loads(ret_val), indent=4))
 
     exit(0)
