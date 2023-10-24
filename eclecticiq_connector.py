@@ -13,6 +13,7 @@ import re
 
 import eiq_api as eiqlib
 
+
 class RetVal(tuple):
     def __new__(cls, val1, val2):
         return tuple.__new__(RetVal, (val1, val2))
