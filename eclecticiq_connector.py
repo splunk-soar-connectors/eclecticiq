@@ -3,13 +3,13 @@
 # Python 3 Compatibility imports
 from __future__ import print_function, unicode_literals
 
-import phantom.app as phantom
-from phantom.base_connector import BaseConnector
-from phantom.action_result import ActionResult
-
-import requests
 import json
 import re
+
+import phantom.app as phantom
+import requests
+from phantom.action_result import ActionResult
+from phantom.base_connector import BaseConnector
 
 import eiq_api as eiqlib
 
