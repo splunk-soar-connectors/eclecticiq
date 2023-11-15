@@ -4,8 +4,8 @@
     "description": "EclecticIQ Intelligence Center integration",
     "type": "reputation",
     "product_vendor": "EclecticIQ",
-    "logo": "eclecticiq.svg",
-    "logo_dark": "eclecticiq_dark.svg",
+    "logo": "logo_eclecticiq.svg",
+    "logo_dark": "logo_eclecticiq_dark.svg",
     "product_name": "Intelligence Center integration",
     "python_version": "3",
     "product_version_regex": ".*",
@@ -31,8 +31,6 @@
             "description": "EclecticIQ Intelligence Center address",
             "data_type": "string",
             "required": true,
-            "value_list": [],
-            "default": "",
             "order": 0,
             "name": "tip_uri",
             "id": 0
@@ -71,8 +69,6 @@
             "description": "EclecticIQ Group Name for Entities",
             "data_type": "string",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 4,
             "name": "tip_group",
             "id": 4
@@ -81,8 +77,6 @@
             "description": "EclecticIQ Outgoing Feed ID # for polling",
             "data_type": "numeric",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 5,
             "name": "tip_of_id",
             "id": 5
@@ -91,8 +85,6 @@
             "description": "Proxy server address",
             "data_type": "string",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 6,
             "name": "tip_proxy_uri",
             "id": 6
@@ -101,8 +93,6 @@
             "description": "Proxy server username",
             "data_type": "string",
             "required": false,
-            "value_list": [],
-            "default": "",
             "order": 7,
             "name": "tip_proxy_user",
             "id": 7
@@ -121,7 +111,6 @@
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "verbose": "",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -132,7 +121,6 @@
             "action": "domain reputation",
             "identifier": "domain_reputation",
             "description": "Queries domain info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -226,7 +214,6 @@
             "action": "email reputation",
             "identifier": "email_reputation",
             "description": "Queries email info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -316,7 +303,6 @@
             "action": "file reputation",
             "identifier": "file_reputation",
             "description": "Queries for file reputation info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -412,7 +398,6 @@
             "action": "ip reputation",
             "identifier": "ip_reputation",
             "description": "Queries IP info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -502,7 +487,6 @@
             "action": "url reputation",
             "identifier": "url_reputation",
             "description": "Queries URL info",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -601,8 +585,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
                     "default": "Sighting created by Splunk SOAR",
                     "order": 0,
                     "name": "sighting_title",
@@ -614,9 +596,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 1,
                     "name": "sighting_description",
                     "id": 2,
@@ -627,7 +606,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "None",
                         "Unknown",
@@ -646,7 +624,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "None",
                         "Unknown",
@@ -665,8 +642,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
                     "default": "Splunk SOAR Sighting, Automatically created",
                     "order": 4,
                     "name": "tags",
@@ -678,9 +653,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 5,
                     "name": "observable_1_value",
                     "id": 6,
@@ -691,7 +663,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "domain",
                         "email",
@@ -713,7 +684,6 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 6,
                     "name": "observable_1_type",
                     "id": 7,
@@ -724,7 +694,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -743,9 +712,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 8,
                     "name": "observable_2_value",
                     "id": 9,
@@ -756,7 +722,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "domain",
                         "email",
@@ -778,7 +743,6 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 9,
                     "name": "observable_2_type",
                     "id": 10,
@@ -789,7 +753,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -808,9 +771,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 11,
                     "name": "observable_3_value",
                     "id": 12,
@@ -821,7 +781,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "domain",
                         "email",
@@ -843,7 +802,6 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 12,
                     "name": "observable_3_type",
                     "id": 13,
@@ -854,7 +812,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -873,98 +830,84 @@
                 {
                     "data_path": "action_result.parameter.sighting_title",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "sighting_title",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.parameter.sighting_description",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "sighting_description",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.parameter.confidence_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "confidence_value",
                     "column_order": 2
                 },
                 {
                     "data_path": "action_result.parameter.impact_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "impact_value",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.parameter.tags",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "tags",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_value",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_type",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_type",
                     "column_order": 6
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_maliciousness",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_maliciousness",
                     "column_order": 7
                 },
                 {
                     "data_path": "action_result.parameter.observable_2_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_2_value",
                     "column_order": 8
                 },
                 {
                     "data_path": "action_result.parameter.observable_2_type",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_2_type",
                     "column_order": 9
                 },
                 {
                     "data_path": "action_result.parameter.observable_2_maliciousness",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_2_maliciousness",
                     "column_order": 10
                 },
                 {
                     "data_path": "action_result.parameter.observable_3_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_3_value",
                     "column_order": 11
                 },
                 {
                     "data_path": "action_result.parameter.observable_3_type",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_3_type",
                     "column_order": 12
                 },
                 {
                     "data_path": "action_result.parameter.observable_3_maliciousness",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_3_maliciousness",
                     "column_order": 13
                 },
@@ -1005,8 +948,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
                     "default": "Indicator created by Splunk SOAR",
                     "order": 0,
                     "name": "indicator_title",
@@ -1018,9 +959,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 1,
                     "name": "indicator_description",
                     "id": 2,
@@ -1031,7 +969,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "None",
                         "Unknown",
@@ -1050,7 +987,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "None",
                         "Unknown",
@@ -1069,8 +1005,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
                     "default": "Splunk SOAR Indicator, Automatically created",
                     "order": 4,
                     "name": "tags",
@@ -1082,9 +1016,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 5,
                     "name": "observable_1_value",
                     "id": 6,
@@ -1095,7 +1026,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "domain",
                         "email",
@@ -1117,7 +1047,6 @@
                         "uri-hash-sha256",
                         "winregistry"
                     ],
-                    "default": "",
                     "order": 6,
                     "name": "observable_1_type",
                     "id": 7,
@@ -1128,7 +1057,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -1147,9 +1075,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 8,
                     "name": "observable_dictionary",
                     "id": 9,
@@ -1160,63 +1085,54 @@
                 {
                     "data_path": "action_result.parameter.indicator_title",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "indicator_title",
                     "column_order": 0
                 },
                 {
                     "data_path": "action_result.parameter.indicator_description",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "indicator_description",
                     "column_order": 1
                 },
                 {
                     "data_path": "action_result.parameter.confidence_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "confidence_value",
                     "column_order": 2
                 },
                 {
                     "data_path": "action_result.parameter.impact_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "impact_value",
                     "column_order": 3
                 },
                 {
                     "data_path": "action_result.parameter.tags",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "tags",
                     "column_order": 4
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_value",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_value",
                     "column_order": 5
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_type",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_type",
                     "column_order": 6
                 },
                 {
                     "data_path": "action_result.parameter.observable_1_maliciousness",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_1_maliciousness",
                     "column_order": 7
                 },
                 {
                     "data_path": "action_result.parameter.observable_dictionary",
                     "data_type": "string",
-                    "contains": [],
                     "column_name": "observable_dictionary",
                     "column_order": 8
                 },
@@ -1248,7 +1164,6 @@
             "action": "query entities",
             "identifier": "query_entities",
             "description": "Query EclecticIQ Intelligence Center for entities",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -1267,8 +1182,6 @@
                         "md5",
                         "sha512"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0,
                     "name": "observable",
                     "id": 1,
@@ -1279,9 +1192,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 1,
                     "name": "entity_title",
                     "id": 2,
@@ -1292,7 +1202,6 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
                     "value_list": [
                         "all",
                         "campaign",
@@ -1409,7 +1318,6 @@
             "action": "query entity by id",
             "identifier": "query_entity_by_id",
             "description": "Query EclecticIQ Intelligence Center for entity by its ID",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -1418,9 +1326,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": true,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 0,
                     "name": "entity_id",
                     "id": 1,
@@ -1507,7 +1412,6 @@
             "action": "eclecticiq request get",
             "identifier": "eclecticiq_request_get",
             "description": "Make HTTP GET request to EclecticIQ Intelligence Center",
-            "verbose": "",
             "type": "generic",
             "read_only": true,
             "parameters": {
@@ -1516,9 +1420,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": true,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 0,
                     "name": "uri",
                     "id": 1,
@@ -1569,7 +1470,6 @@
             "action": "eclecticiq request post",
             "identifier": "eclecticiq_request_post",
             "description": "Make HTTP POST request to EclecticIQ Intelligence Center",
-            "verbose": "",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -1578,9 +1478,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": true,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 0,
                     "name": "uri",
                     "id": 1,
@@ -1591,9 +1488,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": true,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 1,
                     "name": "body",
                     "id": 2,
@@ -1649,7 +1543,6 @@
             "action": "eclecticiq request delete",
             "identifier": "eclecticiq_request_delete",
             "description": "Make HTTP DELETE request to EclecticIQ Intelligence Center",
-            "verbose": "",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -1658,9 +1551,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": true,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
                     "order": 0,
                     "name": "uri",
                     "id": 1,
@@ -1705,7 +1595,6 @@
             "action": "on poll",
             "identifier": "on_poll",
             "description": "Callback action for the on_poll ingest functionality",
-            "verbose": "",
             "type": "ingest",
             "read_only": true,
             "parameters": {
@@ -1714,6 +1603,7 @@
                     "data_type": "string",
                     "required": false,
                     "primary": false,
+                    "order": 0,
                     "name": "container_id"
                 },
                 "start_time": {
@@ -1737,6 +1627,7 @@
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
+                    "order": 3,
                     "name": "container_count"
                 },
                 "artifact_count": {
@@ -1744,6 +1635,7 @@
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
+                    "order": 4,
                     "name": "artifact_count"
                 },
                 "feed_ids": {
