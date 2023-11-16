@@ -311,7 +311,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
         domain = param['domain']
-
+        self.debug_print("Making API call..")
         lookup_result = self.eiq_api.lookup_observable(domain, 'domain')
 
         if lookup_result is None:
@@ -341,7 +341,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
         email = param['email']
-
+        self.debug_print("Making API call..")
         lookup_result = self.eiq_api.lookup_observable(email, 'email')
 
         if lookup_result is None:
@@ -375,7 +375,7 @@ class EclecticiqAppConnector(BaseConnector):
         result = {}
         summary = action_result.update_summary({})
         results_count = 0
-
+        self.debug_print("Making API call..")
         for hash_type in hash_types:
             lookup_result = self.eiq_api.lookup_observable(file_hash, hash_type)
             if isinstance(lookup_result, dict):
@@ -388,7 +388,7 @@ class EclecticiqAppConnector(BaseConnector):
                     'platform_link': lookup_result['platform_link'],
                     'source_name': lookup_result['source_name'],
                     'created': lookup_result['created']
-                    }
+                }
                 result.update(parsed_response)
 
         if results_count > 0:
@@ -405,7 +405,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
         ip = param['ip']
-
+        self.debug_print("Making API call..")
         lookup_result = self.eiq_api.lookup_observable(ip, 'ipv4')
 
         if lookup_result is None:
@@ -435,7 +435,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
         url = param['url']
-
+        self.debug_print("Making API call..")
         lookup_result = self.eiq_api.lookup_observable(url, 'uri')
 
         if lookup_result is None:
@@ -476,6 +476,7 @@ class EclecticiqAppConnector(BaseConnector):
         sighting_impact_value = param.get('impact_value')
         sighting_description = param.get('sighting_description', "")
 
+        self.debug_print("Making API call..")
         sighting = self.eiq_api.create_entity(observable_dict=observables_dict, source_group_name=self._tip_group,
                                               entity_title=sighting_title, entity_description=sighting_description,
                                               entity_tags=sighting_tags, entity_confidence=sighting_conf_value,
@@ -499,21 +500,23 @@ class EclecticiqAppConnector(BaseConnector):
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No Group ID in asset parameters"), None)
 
         try:
-            param['observable_dictionary']
+            param.get('observable_dictionary')
         except KeyError:
             param['observable_dictionary'] = []
 
         observable_dict = self._prepare_entity_observables(param['observable_1_value'],
                                                             param['observable_1_type'],
                                                             param['observable_1_maliciousness'],
-                                                            param['observable_dictionary'])
+                                                            param.get('observable_dictionary'))
 
         indicator_conf_value = param['confidence_value']
         indicator_title = param['indicator_title']
-        indicator_tags = param['tags'].split(",")
+        indicator_tags = param.get('tags')
+        if indicator_tags:
+            indicator_tags = indicator_tags.split(",")
         indicator_impact_value = param.get('impact_value')
         indicator_description = param.get('indicator_description', "")
-
+        self.debug_print("Making API call..")
         indicator = self.eiq_api.create_entity(observable_dict=observable_dict, source_group_name=self._tip_group,
                                               entity_title=indicator_title, entity_description=indicator_description,
                                               entity_tags=indicator_tags, entity_confidence=indicator_conf_value,
@@ -659,11 +662,13 @@ class EclecticiqAppConnector(BaseConnector):
 
         query = param.get('observable', None)
 
-        if param['entity_type'] == "all":
+        if param.get('entity_type') == "all":
             entity_type = None
         else:
-            entity_type = param['entity_type']
+            entity_type = param.get('entity_type')
         entity_value = param.get('entity_title', None)
+
+        self.debug_print("Making API call..")
         query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
 
         if (type(query_result) is dict) or (type(query_result) is list):
@@ -694,7 +699,7 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         entity_id = param.get('entity_id', None)
-
+        self.debug_print("Making API call..")
         query_result = self.eiq_api.get_entity_by_id(entity_id)
 
         if type(query_result).__name__ == "Exception":
@@ -728,6 +733,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
+            self.debug_print("Making API call..")
             request_result = self.eiq_api.send_api_request('get', uri)
             record = {}
             record["reply_status"] = str(request_result.status_code)
@@ -755,6 +761,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
+            self.debug_print("Making API call..")
             request_result = self.eiq_api.send_api_request('delete', uri)
             record = {}
             record["reply_status"] = str(request_result.status_code)
@@ -783,6 +790,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
+            self.debug_print("Making API call..")
             request_result = self.eiq_api.send_api_request('post', uri, data=body)
             record = {}
             record["reply_status"] = str(request_result.status_code)
