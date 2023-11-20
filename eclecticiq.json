@@ -22,7 +22,7 @@
       }
     ],
     "license": "Copyright (c) EclecticIQ, 2023",
-    "app_version": "2.1.1",
+    "app_version": "2.0.0",
     "package_name": "phantom_eclecticiq",
     "main_module": "eclecticiq_connector.py",
     "min_phantom_version": "5.0.1",
