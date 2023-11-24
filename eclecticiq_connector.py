@@ -733,7 +733,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
-            self.debug_print("Making API call..")
+            self.save_progress("Making GET API call..")
             request_result = self.eiq_api.send_api_request('get', uri)
             record = {}
             record["reply_status"] = str(request_result.status_code)
@@ -761,7 +761,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
-            self.debug_print("Making API call..")
+            self.save_progress("Making DELETE API call..")
             request_result = self.eiq_api.send_api_request('delete', uri)
             record = {}
             record["reply_status"] = str(request_result.status_code)
@@ -790,7 +790,7 @@ class EclecticiqAppConnector(BaseConnector):
         summary = action_result.update_summary({})
 
         try:
-            self.debug_print("Making API call..")
+            self.save_progress("Making POST API call..")
             request_result = self.eiq_api.send_api_request('post', uri, data=body)
             record = {}
             record["reply_status"] = str(request_result.status_code)
