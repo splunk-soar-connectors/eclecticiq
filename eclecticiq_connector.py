@@ -724,7 +724,7 @@ class EclecticiqAppConnector(BaseConnector):
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
-    def _handle_equest_get(self, param):
+    def _handle_request_get(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
