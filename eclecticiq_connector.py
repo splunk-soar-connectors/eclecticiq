@@ -11,7 +11,7 @@ import requests
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 
-import eiq_api as eiqlib
+import eclecticiq_api as eiqlib
 
 
 class RetVal(tuple):
@@ -848,13 +848,13 @@ class EclecticiqAppConnector(BaseConnector):
         elif action_id == 'query_entity_by_id':
             ret_val = self._handle_query_entity_by_id(param)
 
-        elif action_id == 'eclecticiq_request_get':
+        elif action_id == 'request_get':
             ret_val = self._handle_eclecticiq_request_get(param)
 
-        elif action_id == 'eclecticiq_request_post':
+        elif action_id == 'request_post':
             ret_val = self._handle_eclecticiq_request_post(param)
 
-        elif action_id == 'eclecticiq_request_delete':
+        elif action_id == 'request_delete':
             ret_val = self._handle_eclecticiq_request_delete(param)
 
         elif action_id == 'on_poll':

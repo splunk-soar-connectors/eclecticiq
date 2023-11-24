@@ -1,5 +1,5 @@
 {
-    "appid": "a855fbae-698a-4f7d-9b06-80cf3ae1742d",
+    "appid": "66ed0a79-f85d-4463-8fa2-45f4180a2d51",
     "name": "EclecticIQ",
     "description": "EclecticIQ Intelligence Center integration",
     "type": "reputation",
@@ -25,7 +25,7 @@
     "app_version": "2.0.0",
     "package_name": "phantom_eclecticiq",
     "main_module": "eclecticiq_connector.py",
-    "min_phantom_version": "5.0.1",
+    "min_phantom_version": "5.5.0",
     "configuration": {
         "tip_uri": {
             "description": "EclecticIQ Intelligence Center address",
@@ -1409,8 +1409,8 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "eclecticiq request get",
-            "identifier": "eclecticiq_request_get",
+            "action": "request get",
+            "identifier": "request_get",
             "description": "Make HTTP GET request to EclecticIQ Intelligence Center",
             "type": "generic",
             "read_only": true,
@@ -1467,8 +1467,8 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "eclecticiq request post",
-            "identifier": "eclecticiq_request_post",
+            "action": "request post",
+            "identifier": "request_post",
             "description": "Make HTTP POST request to EclecticIQ Intelligence Center",
             "type": "generic",
             "read_only": false,
@@ -1540,8 +1540,8 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "eclecticiq request delete",
-            "identifier": "eclecticiq_request_delete",
+            "action": "request delete",
+            "identifier": "request_delete",
             "description": "Make HTTP DELETE request to EclecticIQ Intelligence Center",
             "type": "generic",
             "read_only": false,
