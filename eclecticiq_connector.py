@@ -724,7 +724,7 @@ class EclecticiqAppConnector(BaseConnector):
         else:
             return action_result.set_status(phantom.APP_ERROR)
 
-    def _handle_eclecticiq_request_get(self, param):
+    def _handle_equest_get(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
@@ -753,7 +753,7 @@ class EclecticiqAppConnector(BaseConnector):
             action_result.add_data(record)
             return action_result.set_status(phantom.APP_ERROR)
 
-    def _handle_eclecticiq_request_delete(self, param):
+    def _handle_request_delete(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
@@ -780,7 +780,7 @@ class EclecticiqAppConnector(BaseConnector):
             action_result.add_data(record)
             return action_result.set_status(phantom.APP_ERROR)
 
-    def _handle_eclecticiq_request_post(self, param):
+    def _handle_request_post(self, param):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
@@ -849,13 +849,13 @@ class EclecticiqAppConnector(BaseConnector):
             ret_val = self._handle_query_entity_by_id(param)
 
         elif action_id == 'request_get':
-            ret_val = self._handle_eclecticiq_request_get(param)
+            ret_val = self._handle_request_get(param)
 
         elif action_id == 'request_post':
-            ret_val = self._handle_eclecticiq_request_post(param)
+            ret_val = self._handle_request_post(param)
 
         elif action_id == 'request_delete':
-            ret_val = self._handle_eclecticiq_request_delete(param)
+            ret_val = self._handle_request_delete(param)
 
         elif action_id == 'on_poll':
             ret_val = self._handle_on_poll(param)
