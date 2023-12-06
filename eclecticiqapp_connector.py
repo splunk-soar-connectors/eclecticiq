@@ -1,6 +1,6 @@
 # File: eclectiqapp_connector.py
 
-# Copyright (c) EclecticIQ, 2023
+# Copyright (c) EclecticIQ, 2019-2023
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ from __future__ import print_function, unicode_literals
 
 import json
 import re
+import sys
 
 import phantom.app as phantom
 import requests
@@ -119,8 +120,8 @@ class EclecticiqAppConnector(BaseConnector):
 
         elif feed_info[0]['update_strategy'] == 'APPEND':
             feed_last_run = {}
-            feed_last_run['last_ingested'] = self._state.get('last_ingested', None)
-            feed_last_run['created_at'] = self._state.get('created_at', None)
+            feed_last_run['last_ingested'] = self._state.get('last_ingested')
+            feed_last_run['created_at'] = self._state.get('created_at')
 
             feed_content_block_list = self.eiq_api.get_feed_content_blocks(feed=feed_info[0], feed_last_run=feed_last_run)
             containers_processed = 0
@@ -485,10 +486,10 @@ class EclecticiqAppConnector(BaseConnector):
 
         observables_dict = self._prepare_observables(param)
 
-        sighting_conf_value = param['confidence_value']
-        sighting_title = param['sighting_title']
-        sighting_tags = param['tags'].split(",")
-        sighting_impact_value = param.get('impact_value')
+        sighting_conf_value = param.get('confidence_value', "None")
+        sighting_title = param.get('sighting_title', "Sighting created by Splunk SOAR")
+        sighting_tags = param.get('tags', "Splunk SOAR Sighting, Automatically created").split(",")
+        sighting_impact_value = param.get('impact_value', "None")
         sighting_description = param.get('sighting_description', "")
 
         self.debug_print("Making API call..")
@@ -521,15 +522,15 @@ class EclecticiqAppConnector(BaseConnector):
 
         observable_dict = self._prepare_entity_observables(param['observable_1_value'],
                                                             param['observable_1_type'],
-                                                            param['observable_1_maliciousness'],
+                                                            param.get('observable_1_maliciousness', "Unknown"),
                                                             param.get('observable_dictionary'))
 
-        indicator_conf_value = param['confidence_value']
-        indicator_title = param['indicator_title']
+        indicator_conf_value = param.get('confidence_value', "None")
+        indicator_title = param.get('indicator_title', "indicator_title")
         indicator_tags = param.get('tags')
         if indicator_tags:
             indicator_tags = indicator_tags.split(",")
-        indicator_impact_value = param.get('impact_value')
+        indicator_impact_value = param.get('impact_value', "None")
         indicator_description = param.get('indicator_description', "")
         self.debug_print("Making API call..")
         indicator = self.eiq_api.create_entity(observable_dict=observable_dict, source_group_name=self._tip_group,
@@ -675,13 +676,13 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        query = param.get('observable', None)
+        query = param.get('observable')
 
         if param.get('entity_type') == "all":
             entity_type = None
         else:
             entity_type = param.get('entity_type')
-        entity_value = param.get('entity_title', None)
+        entity_value = param.get('entity_title')
 
         self.debug_print("Making API call..")
         query_result = self.eiq_api.search_entity(entity_value=entity_value, entity_type=entity_type, observable_value=query)
@@ -713,7 +714,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        entity_id = param.get('entity_id', None)
+        entity_id = param.get('entity_id')
         self.debug_print("Making API call..")
         query_result = self.eiq_api.get_entity_by_id(entity_id)
 
@@ -743,7 +744,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        uri = param.get('uri', None)
+        uri = param.get('uri')
 
         summary = action_result.update_summary({})
 
@@ -772,7 +773,7 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        uri = param.get('uri', None)
+        uri = param.get('uri')
         summary = action_result.update_summary({})
 
         try:
@@ -799,8 +800,8 @@ class EclecticiqAppConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        uri = param.get('uri', None)
-        body = json.loads(param.get('body', None))
+        uri = param.get('uri')
+        body = json.loads(param.get('body'))
 
         summary = action_result.update_summary({})
 
@@ -888,13 +889,13 @@ class EclecticiqAppConnector(BaseConnector):
                                       username="",
                                       password=config['tip_password'],
                                       verify_ssl=config.get('tip_ssl_check', False),
-                                      proxy_ip=config.get('tip_proxy_uri', None),
-                                      proxy_password=config.get('tip_proxy_password', None),
-                                      proxy_username=config.get('tip_proxy_user', None),
+                                      proxy_ip=config.get('tip_proxy_uri'),
+                                      proxy_password=config.get('tip_proxy_password'),
+                                      proxy_username=config.get('tip_proxy_user'),
                                       init_cred_test=False)
 
-        self._tip_group = config.get('tip_group', None)
-        self._tip_of_id = config.get('tip_of_id', None)
+        self._tip_group = config.get('tip_group')
+        self._tip_of_id = config.get('tip_of_id')
 
         return phantom.APP_SUCCESS
 
@@ -920,6 +921,7 @@ if __name__ == '__main__':
 
     username = args.username
     password = args.password
+    verify = args.verify
 
     if (username is not None and password is None):
 
@@ -930,7 +932,7 @@ if __name__ == '__main__':
     if (username and password):
         try:
             print("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get("https://127.0.0.1/login", verify=verify)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -943,11 +945,11 @@ if __name__ == '__main__':
             headers['Referer'] = 'https://127.0.0.1/login'
 
             print("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post("https://127.0.0.1/login", verify=verify, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print("Unable to get session id from the platfrom. Error: " + str(e))
-            exit(1)
+            sys.exit(0)
 
     with open(args.input_test_json) as f:
         in_json = f.read()
@@ -961,7 +963,7 @@ if __name__ == '__main__':
             in_json['user_session_token'] = session_id
             connector._set_csrf_info(csrftoken, headers['Referer'])
 
-        ret_val = connector._handle_action(json.dumps(in_json), None)
+        ret_val = connector._handle_action(json.dumps(in_json))
         print(json.dumps(json.loads(ret_val), indent=4))
 
-    exit(0)
+    sys.exit(0)

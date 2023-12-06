@@ -21,7 +21,7 @@
             "name": "David Greenwood"
         }
     ],
-    "license": "Copyright (c) EclecticIQ, 2023",
+    "license": "Copyright (c) EclecticIQ, 2019-2023",
     "app_version": "2.0.0",
     "package_name": "phantom_eclecticiqapp",
     "main_module": "eclecticiqapp_connector.py",
@@ -42,7 +42,6 @@
         "tip_api": {
             "description": "EclecticIQ public API version",
             "data_type": "string",
-            "required": true,
             "value_list": [
                 "v1",
                 "v2"
@@ -51,10 +50,8 @@
             "order": 2
         },
         "tip_ssl_check": {
-            "description": "EclecticIQ SSL cert check",
+            "description": "EclecticIQ SSL Cert check",
             "data_type": "boolean",
-            "required": true,
-            "default": "False",
             "order": 3
         },
         "tip_group": {
@@ -68,17 +65,17 @@
             "order": 5
         },
         "tip_proxy_uri": {
-            "description": "Proxy server address",
+            "description": "Proxy Server Address",
             "data_type": "string",
             "order": 6
         },
         "tip_proxy_user": {
-            "description": "Proxy server username",
+            "description": "Proxy Server Username",
             "data_type": "string",
             "order": 7
         },
         "tip_proxy_password": {
-            "description": "Proxy server password",
+            "description": "Proxy Server Password",
             "data_type": "password",
             "order": 8
         }
@@ -573,7 +570,6 @@
                 "sighting_title": {
                     "description": "Sighting title",
                     "data_type": "string",
-                    "required": true,
                     "default": "Sighting created by Splunk SOAR",
                     "order": 0
                 },
@@ -585,7 +581,6 @@
                 "confidence_value": {
                     "description": "Confidence value",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -599,7 +594,6 @@
                 "impact_value": {
                     "description": "Impact value",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -613,7 +607,6 @@
                 "tags": {
                     "description": "Sighting tags delimited by ','",
                     "data_type": "string",
-                    "required": true,
                     "default": "Splunk SOAR Sighting, Automatically created",
                     "order": 4
                 },
@@ -653,7 +646,6 @@
                 "observable_1_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -885,7 +877,6 @@
                 "indicator_title": {
                     "description": "Indicator title",
                     "data_type": "string",
-                    "required": true,
                     "default": "Indicator created by Splunk SOAR",
                     "order": 0
                 },
@@ -897,7 +888,6 @@
                 "confidence_value": {
                     "description": "Confidence value",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -911,7 +901,6 @@
                 "impact_value": {
                     "description": "Impact value",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "None",
                         "Unknown",
@@ -964,7 +953,6 @@
                 "observable_1_maliciousness": {
                     "description": "Observalble maliciousness",
                     "data_type": "string",
-                    "required": true,
                     "value_list": [
                         "Malicious (High confidence)",
                         "Malicious (Medium confidence)",
@@ -1092,6 +1080,7 @@
                         "md5",
                         "sha512"
                     ],
+                    "primary": true,
                     "order": 0
                 },
                 "entity_title": {
@@ -1228,11 +1217,8 @@
                     "description": "Entity ID in EclecticIQ format, for example: a86f8393-eff6-4b31-b203-f63152be5a43",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "order": 0,
-                    "name": "entity_id",
-                    "id": 1,
-                    "param_name": "entity_id"
+                    "id": 1
                 }
             },
             "output": [
@@ -1329,11 +1315,8 @@
                     "description": "EclecticIQ URI excluding Intelligence Cetner address but including API version and params if needed. e.g. /private/status",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "order": 0,
-                    "name": "uri",
-                    "id": 1,
-                    "param_name": "uri"
+                    "id": 1
                 }
             },
             "output": [
@@ -1394,14 +1377,12 @@
                     "description": "EclecticIQ URI excluding Intelligence Cetner address but including API version and params if needed",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "order": 0
                 },
                 "body": {
                     "description": "JSON payload",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "order": 1
                 }
             },
@@ -1467,7 +1448,6 @@
                     "description": "EclecticIQ URI excluding Intelligence Cetner address but including API version and params if needed",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "order": 0
                 }
             },
