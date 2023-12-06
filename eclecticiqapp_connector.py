@@ -526,7 +526,7 @@ class EclecticiqAppConnector(BaseConnector):
                                                             param.get('observable_dictionary'))
 
         indicator_conf_value = param.get('confidence_value', "None")
-        indicator_title = param.get('indicator_title', "indicator_title")
+        indicator_title = param.get('indicator_title', "Indicator created by Splunk SOAR")
         indicator_tags = param.get('tags')
         if indicator_tags:
             indicator_tags = indicator_tags.split(",")
