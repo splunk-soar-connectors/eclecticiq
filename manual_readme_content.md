@@ -1,18 +1,3 @@
-[comment]: # "File: README.md"
-[comment]: # "Copyright (c) EclecticIQ, 2019-2023"
-[comment]: # ""
-[comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
-[comment]: # "you may not use this file except in compliance with the License."
-[comment]: # "You may obtain a copy of the License at"
-[comment]: # ""
-[comment]: # "    http://www.apache.org/licenses/LICENSE-2.0"
-[comment]: # ""
-[comment]: # "Unless required by applicable law or agreed to in writing, software distributed under"
-[comment]: # "the License is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,"
-[comment]: # "either express or implied. See the License for the specific language governing permissions"
-[comment]: # "and limitations under the License."
-[comment]: # ""
-
 # EclecticIQ Intelligence Center app for Splunk SOAR
 
 The EclecticIQ Intelligence Center app for Splunk SOAR allows you to
@@ -24,95 +9,95 @@ SOAR as events to use in playbooks.
 
 To install the app in Splunk SOAR:
 
-1.  Open the Apps menu
+1. Open the Apps menu
 
-2.  Install the application:
+1. Install the application:
 
-    - Select **New Apps** and search for "EclecticIQ".
+   - Select **New Apps** and search for "EclecticIQ".
 
-    Or, you can install using the package file:
+   Or, you can install using the package file:
 
-    1.  Select **Install app**
-    2.  In the window that appears, drag and drop the package file to
-        open it.
+   1. Select **Install app**
+   1. In the window that appears, drag and drop the package file to
+      open it.
 
-Once done, you can find it in **Apps \> Unconfigured Apps**.
+Once done, you can find it in **Apps > Unconfigured Apps**.
 
 ## Configure EclecticIQ Intelligence Center
 
 Configure EclecticIQ Intelligence Center to connect to the app. Log into
 EclecticIQ Intelligence Center and do the following:
 
-1.  Create an API token. Select your user profile picture at the bottom
-    left, then select **API tokens \> + New API token**.
+1. Create an API token. Select your user profile picture at the bottom
+   left, then select **API tokens > + New API token**.
 
-    Copy the API token and store it safely.
+   Copy the API token and store it safely.
 
-2.  To create Entities (Indicators and Sightings) you need to create a
-    Source Group that will be used as a source for that entity.
+1. To create Entities (Indicators and Sightings) you need to create a
+   Source Group that will be used as a source for that entity.
 
-3.  If you want to fetch entities as events into SOAR, create an
-    outgoing feed with following parameters:
+1. If you want to fetch entities as events into SOAR, create an
+   outgoing feed with following parameters:
 
-    - **Transport Type:** HTTP download.
-    - **Content Type:** EclecticIQ JSON
-    - **Datasets:** Add one or more datasets. Entities from these
-      datasets will be made accessible to Splunk SOAR. For more
-      information, see the "On-Poll action" section below.
-    - **Update strategy:**
-      - (Recommended) Append, or
-      - Replace
-    - **Authorized groups:** Select one or more groups that your user
-      account belongs to. Your account must be assigned a role in that
-      group that has at least `read entities` and `read extracts`
-      permissions.
+   - **Transport Type:** HTTP download.
+   - **Content Type:** EclecticIQ JSON
+   - **Datasets:** Add one or more datasets. Entities from these
+     datasets will be made accessible to Splunk SOAR. For more
+     information, see the "On-Poll action" section below.
+   - **Update strategy:**
+     - (Recommended) Append, or
+     - Replace
+   - **Authorized groups:** Select one or more groups that your user
+     account belongs to. Your account must be assigned a role in that
+     group that has at least `read entities` and `read extracts`
+     permissions.
 
-4.  Note down the **ID** of the outgoing feed you just created. To find
-    the outgoing feed ID:
+1. Note down the **ID** of the outgoing feed you just created. To find
+   the outgoing feed ID:
 
-    1.  Select the outgoing feed.
+   1. Select the outgoing feed.
 
-    2.  Inspect the URL that appears in your browser address bar.
+   1. Inspect the URL that appears in your browser address bar.
 
-        E.g.:
-        `https://ic-playground.eclecticiq.com/main/configuration/outgoing-feeds?tab=detail&detail=62`
+      E.g.:
+      `https://ic-playground.eclecticiq.com/main/configuration/outgoing-feeds?tab=detail&detail=62`
 
-        The outgoing feed ID is the value for the `detail` query
-        parameter.
+      The outgoing feed ID is the value for the `detail` query
+      parameter.
 
-        In the example here, the outgoing feed ID is `62`.
+      In the example here, the outgoing feed ID is `62`.
 
 Once done, configure the EclecticIQ Intelligence Center app for Splunk
 SOAR.
 
 In Splunk SOAR:
 
-1.  In the **New Asset** menu, select **Asset Settings**. Set the
-    following fields:
+1. In the **New Asset** menu, select **Asset Settings**. Set the
+   following fields:
 
-    - **EclecticIQ Intelligence Center address:** Enter a fully
-      qualified URL for the Intelligence Center instance to connect to.
+   - **EclecticIQ Intelligence Center address:** Enter a fully
+     qualified URL for the Intelligence Center instance to connect to.
 
-      E.g.: <https://ic-playground.eclecticiq.com>
+     E.g.: <https://ic-playground.eclecticiq.com>
 
-    - **EclecticIQ Password/Token:** Enter the API token you generated
-      earlier.
+   - **EclecticIQ Password/Token:** Enter the API token you generated
+     earlier.
 
-    - **EclecticIQ Group Name for Entities:** Enter the **Source Group**
-      you created earlier.
+   - **EclecticIQ Group Name for Entities:** Enter the **Source Group**
+     you created earlier.
 
-    - **EclecticIQ Outgoing Feed ID \# for polling:** Enter the ID of
-      the outgoing feed you created earlier.
+   - **EclecticIQ Outgoing Feed ID # for polling:** Enter the ID of
+     the outgoing feed you created earlier.
 
-    - **EclecticIQ SSL cert check:** Enable if you provide a custom
-      certificate to your EclecticIQ Intelligence Center.
+   - **EclecticIQ SSL cert check:** Enable if you provide a custom
+     certificate to your EclecticIQ Intelligence Center.
 
-      You must add these custom certificates to the Splunk SOAR
-      (On-premises) certificate store. See:
-      <https://docs.splunk.com/Documentation/SOARonprem/6.0.0/Admin/AddOrRemoveCertificates>
+     You must add these custom certificates to the Splunk SOAR
+     (On-premises) certificate store. See:
+     <https://docs.splunk.com/Documentation/SOARonprem/6.0.0/Admin/AddOrRemoveCertificates>
 
-    - **Proxy settings:** Set proxy settings to allow Splunk SOAR to
-      connect to your Intelligence Center instance.
+   - **Proxy settings:** Set proxy settings to allow Splunk SOAR to
+     connect to your Intelligence Center instance.
 
 Once done, select **Test connectivity**.
 
