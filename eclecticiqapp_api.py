@@ -25,6 +25,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 # from app.qpylib import qpylib
 
 __version__ = "1.0.0"
@@ -208,7 +209,10 @@ class EclecticIQ_api:
             raise
 
     def send_api_request(self, method, path, params=None, data=None):
-        url = self.baseurl + path
+        if not isinstance(path, str) or not path.startswith("/"):
+            raise ValueError("EclecticIQ API request paths must begin with '/'")
+
+        url = self.baseurl.rstrip("/") + path
 
         r = None
         try:
