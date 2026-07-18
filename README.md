@@ -1,9 +1,9 @@
 # EclecticIQ app
 
-Publisher: EclecticIQ \
-Connector Version: 2.0.0 \
-Product Vendor: EclecticIQ \
-Product Name: Intelligence Center integration \
+Publisher: EclecticIQ <br>
+Connector Version: 2.0.0 <br>
+Product Vendor: EclecticIQ <br>
+Product Name: Intelligence Center integration <br>
 Minimum Product Version: 5.5.0
 
 EclecticIQ Intelligence Center integration
@@ -99,10 +99,12 @@ In Splunk SOAR:
    - **EclecticIQ Outgoing Feed ID # for polling:** Enter the ID of
      the outgoing feed you created earlier.
 
-   - **EclecticIQ SSL cert check:** Enable if you provide a custom
-     certificate to your EclecticIQ Intelligence Center.
+   - **EclecticIQ SSL cert check:** Keep this enabled to verify the
+     Intelligence Center's TLS certificate. Disabling verification can expose
+     the API token and response data to network interception; use that setting
+     only in a controlled test environment.
 
-     You must add these custom certificates to the Splunk SOAR
+     Add private or custom certificates to the Splunk SOAR
      (On-premises) certificate store. See:
      <https://docs.splunk.com/Documentation/SOARonprem/6.0.0/Admin/AddOrRemoveCertificates>
 
@@ -299,26 +301,26 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration \
-[domain reputation](#action-domain-reputation) - Queries domain info \
-[email reputation](#action-email-reputation) - Queries email info \
-[file reputation](#action-file-reputation) - Queries for file reputation info \
-[ip reputation](#action-ip-reputation) - Queries IP info \
-[url reputation](#action-url-reputation) - Queries URL info \
-[create sighting](#action-create-sighting) - Create sighting in EclecticIQ TIP \
-[create indicator](#action-create-indicator) - Create indicator in EclecticIQ TIP \
-[query entities](#action-query-entities) - Query EclecticIQ Intelligence Center for entities \
-[query entity by id](#action-query-entity-by-id) - Query EclecticIQ Intelligence Center for entity by its ID \
-[request get](#action-request-get) - Make HTTP GET request to EclecticIQ Intelligence Center \
-[request post](#action-request-post) - Make HTTP POST request to EclecticIQ Intelligence Center \
-[request delete](#action-request-delete) - Make HTTP DELETE request to EclecticIQ Intelligence Center \
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration <br>
+[domain reputation](#action-domain-reputation) - Queries domain info <br>
+[email reputation](#action-email-reputation) - Queries email info <br>
+[file reputation](#action-file-reputation) - Queries for file reputation info <br>
+[ip reputation](#action-ip-reputation) - Queries IP info <br>
+[url reputation](#action-url-reputation) - Queries URL info <br>
+[create sighting](#action-create-sighting) - Create sighting in EclecticIQ TIP <br>
+[create indicator](#action-create-indicator) - Create indicator in EclecticIQ TIP <br>
+[query entities](#action-query-entities) - Query EclecticIQ Intelligence Center for entities <br>
+[query entity by id](#action-query-entity-by-id) - Query EclecticIQ Intelligence Center for entity by its ID <br>
+[request get](#action-request-get) - Make HTTP GET request to EclecticIQ Intelligence Center <br>
+[request post](#action-request-post) - Make HTTP POST request to EclecticIQ Intelligence Center <br>
+[request delete](#action-request-delete) - Make HTTP DELETE request to EclecticIQ Intelligence Center <br>
 [on poll](#action-on-poll) - Callback action for the on_poll ingest functionality
 
 ## action: 'test connectivity'
 
 Validate the asset configuration for connectivity using supplied configuration
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -333,7 +335,7 @@ No Output
 
 Queries domain info
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -363,7 +365,7 @@ summary.total_objects_successful | numeric | | |
 
 Queries email info
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -393,7 +395,7 @@ summary.total_objects_successful | numeric | | |
 
 Queries for file reputation info
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -423,7 +425,7 @@ summary.total_objects_successful | numeric | | |
 
 Queries IP info
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -453,7 +455,7 @@ summary.total_objects_successful | numeric | | |
 
 Queries URL info
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -483,7 +485,7 @@ summary.total_objects_successful | numeric | | |
 
 Create sighting in EclecticIQ TIP
 
-Type: **contain** \
+Type: **contain** <br>
 Read only: **False**
 
 The EclecticIQ group name must be provided for this action to run successfully. Either in the source parameter, or the asset configuration.
@@ -536,7 +538,7 @@ summary.total_objects_successful | numeric | | |
 
 Create indicator in EclecticIQ TIP
 
-Type: **contain** \
+Type: **contain** <br>
 Read only: **False**
 
 Action creates Indicator entity in The EclecticIQ Intelligence Center. Group name used as source must be provided for this action to run successfully. Either in the source parameter, or the asset configuration.
@@ -579,7 +581,7 @@ summary.total_objects_successful | numeric | | |
 
 Query EclecticIQ Intelligence Center for entities
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -615,7 +617,7 @@ summary.total_objects_successful | numeric | | |
 
 Query EclecticIQ Intelligence Center for entity by its ID
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -647,7 +649,7 @@ summary.total_objects_successful | numeric | | |
 
 Make HTTP GET request to EclecticIQ Intelligence Center
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -673,7 +675,7 @@ summary.total_objects_successful | numeric | | |
 
 Make HTTP POST request to EclecticIQ Intelligence Center
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -701,7 +703,7 @@ summary.total_objects_successful | numeric | | |
 
 Make HTTP DELETE request to EclecticIQ Intelligence Center
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -726,7 +728,7 @@ summary.total_objects_successful | numeric | | |
 
 Callback action for the on_poll ingest functionality
 
-Type: **ingest** \
+Type: **ingest** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -748,7 +750,7 @@ ______________________________________________________________________
 
 Auto-generated Splunk SOAR Connector documentation.
 
-Copyright 2025 Splunk Inc.
+Copyright 2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
