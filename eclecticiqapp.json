@@ -52,6 +52,7 @@
         "tip_ssl_check": {
             "description": "EclecticIQ SSL Cert check",
             "data_type": "boolean",
+            "default": true,
             "order": 3
         },
         "tip_group": {

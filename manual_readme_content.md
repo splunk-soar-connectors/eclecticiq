@@ -89,10 +89,12 @@ In Splunk SOAR:
    - **EclecticIQ Outgoing Feed ID # for polling:** Enter the ID of
      the outgoing feed you created earlier.
 
-   - **EclecticIQ SSL cert check:** Enable if you provide a custom
-     certificate to your EclecticIQ Intelligence Center.
+   - **EclecticIQ SSL cert check:** Keep this enabled to verify the
+     Intelligence Center's TLS certificate. Disabling verification can expose
+     the API token and response data to network interception; use that setting
+     only in a controlled test environment.
 
-     You must add these custom certificates to the Splunk SOAR
+     Add private or custom certificates to the Splunk SOAR
      (On-premises) certificate store. See:
      <https://docs.splunk.com/Documentation/SOARonprem/6.0.0/Admin/AddOrRemoveCertificates>
 

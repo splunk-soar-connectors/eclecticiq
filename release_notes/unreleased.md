@@ -1,3 +1,4 @@
 **Unreleased**
 
 * Restrict caller-supplied API request paths to the configured EclecticIQ host.
+* Enable TLS certificate verification by default and document the risk of disabling it.

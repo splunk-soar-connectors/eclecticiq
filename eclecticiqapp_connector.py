@@ -893,7 +893,7 @@ class EclecticiqAppConnector(BaseConnector):
             eiq_api_version=config.get("tip_api", "v1"),
             username="",
             password=config["tip_password"],
-            verify_ssl=config.get("tip_ssl_check", False),
+            verify_ssl=config.get("tip_ssl_check", True),
             proxy_ip=config.get("tip_proxy_uri"),
             proxy_password=config.get("tip_proxy_password"),
             proxy_username=config.get("tip_proxy_user"),
