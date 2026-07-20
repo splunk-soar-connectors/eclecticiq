@@ -1,7 +1,7 @@
 # EclecticIQ app
 
 Publisher: EclecticIQ <br>
-Connector Version: 2.0.0 <br>
+Connector Version: 2.0.1 <br>
 Product Vendor: EclecticIQ <br>
 Product Name: Intelligence Center integration <br>
 Minimum Product Version: 5.5.0
