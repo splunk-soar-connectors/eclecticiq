@@ -1,6 +1,6 @@
 # File: eclectiqapp_connector.py
 
-# Copyright (c) EclecticIQ, 2019-2025
+# Copyright (c) EclecticIQ, 2019-2026
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -743,6 +743,8 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         uri = param.get("uri")
+        if not isinstance(uri, str) or not uri.startswith("/"):
+            return action_result.set_status(phantom.APP_ERROR, "EclecticIQ API request paths must begin with '/'")
 
         summary = action_result.update_summary({})
 
@@ -772,6 +774,9 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         uri = param.get("uri")
+        if not isinstance(uri, str) or not uri.startswith("/"):
+            return action_result.set_status(phantom.APP_ERROR, "EclecticIQ API request paths must begin with '/'")
+
         summary = action_result.update_summary({})
 
         try:
@@ -799,6 +804,9 @@ class EclecticiqAppConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         uri = param.get("uri")
+        if not isinstance(uri, str) or not uri.startswith("/"):
+            return action_result.set_status(phantom.APP_ERROR, "EclecticIQ API request paths must begin with '/'")
+
         body = json.loads(param.get("body"))
 
         summary = action_result.update_summary({})
@@ -885,7 +893,7 @@ class EclecticiqAppConnector(BaseConnector):
             eiq_api_version=config.get("tip_api", "v1"),
             username="",
             password=config["tip_password"],
-            verify_ssl=config.get("tip_ssl_check", False),
+            verify_ssl=config.get("tip_ssl_check", True),
             proxy_ip=config.get("tip_proxy_uri"),
             proxy_password=config.get("tip_proxy_password"),
             proxy_username=config.get("tip_proxy_user"),

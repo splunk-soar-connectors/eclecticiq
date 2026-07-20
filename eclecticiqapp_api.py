@@ -1,6 +1,6 @@
 # File: eclecticiqapp_api.py
 
-# Copyright (c) EclecticIQ, 2019-2025
+# Copyright (c) EclecticIQ, 2019-2026
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,10 +20,7 @@ import logging
 import re
 
 import requests
-import urllib3
 
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # from app.qpylib import qpylib
 
@@ -208,7 +205,10 @@ class EclecticIQ_api:
             raise
 
     def send_api_request(self, method, path, params=None, data=None):
-        url = self.baseurl + path
+        if not isinstance(path, str) or not path.startswith("/"):
+            raise ValueError("EclecticIQ API request paths must begin with '/'")
+
+        url = self.baseurl.rstrip("/") + path
 
         r = None
         try:
